@@ -1,2 +1,2 @@
-hello git 
-this is my first git , i hope it can be done!
+the first git has been changed!
+change must be recorded!
