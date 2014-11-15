@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 
+	"-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jxc.web.user.dao.InfoDao">
+	<resultMap type="com.jxc.web.user.model.InfoEntity" id="R_Info_ENTITY" />
+	<resultMap type="String" id="str" />
+	<resultMap type="java.util.HashMap" id="hashmap"></resultMap>
+	<!-- 插入数据 -->
+	<select id="addInfo" resultMap="R_Info_ENTITY"
+		parameterType="map">
+		INSERT INTO `sky`.`t_3g_info` (`ID`, `OPERATORS`, `COUNTRY`,`DAY_RENT`,`DAY_BEGIN`,`DAY_END`,`IS_VALID`, `CREATE_USER`, `CREATE_TIME`, `MODIFY_USER`, `MODIFY_TIME`, `REMARK`) VALUES (#{id}, #{operators}, #{country},#{day_rent},#{day_begin},#{day_end}, '0001', #{create_user}, #{create_time}, #{create_user},#{create_time}, #{remark});
+	</select>
+	<select id="selectInfo" resultMap="R_Info_ENTITY" parameterType="map">
+		SELECT * FROM `sky`.`t_3g_info` ;
+	</select>
+	<!-- 根据设备号查询目的地 ti.IS_VALID,ti.DAY_RENT,ti.ID-->
+	<select id="queryD_country" resultMap="hashmap" parameterType="map">
+		<!-- SELECT ti.COUNTRY FROM t_3g_info ti LEFT JOIN t_3g_equipment te ON ti.ID = te.3G_ID AND te.`NO` = #{equipment_Sno}; -->
+		<!-- SELECT COUNTRY FROM t_3g_info WHERE ID = (SELECT SIM_ID FROM t_3g_equipment WHERE NO = #{equipment_Sno}); -->
+		SELECT tl.ITEM_TEXT,tl.ITEM_VALUE,tl.DESCRIPTION FROM t_info_code_line tl LEFT JOIN t_info_code tc ON tl.CODEID = tc.ID WHERE tc.CODE = 'country' AND tl.`STATUS`='1' AND tl.ITEM_VALUE = (SELECT COUNTRY FROM t_3g_info  WHERE ID = (SELECT SIM_ID FROM t_3g_equipment WHERE NO = #{equipment_Sno}));
+	</select>
+	<!-- 根据sim  id查询sim卡信息 -->
+	<select id="queryInfoById" resultMap="R_Info_ENTITY" parameterType="map">
+		SELECT * FROM t_3g_info WHERE ID = #{id};
+	</select>
+</mapper>

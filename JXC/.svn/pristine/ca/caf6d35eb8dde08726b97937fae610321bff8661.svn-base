@@ -1,0 +1,288 @@
+package com.jxc.web.user.ctrl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.druid.util.StringUtils;
+import com.alibaba.fastjson.JSON;
+import com.jxc.web.user.model.CounterEntity;
+import com.jxc.web.user.model.EquipmentEntity;
+import com.jxc.web.user.service.CounterService;
+import com.jxc.web.user.service.EquipmentService;
+import com.jxc.web.user.service.InfoService;
+import com.jxc.web.user.service.OrderService;
+
+@Controller
+@RequestMapping("equipment")
+public class EquipmentCtl {
+	@Autowired
+	private EquipmentService equipmentservice;
+	@Autowired
+	private InfoService infoservice;
+	@Autowired
+	private OrderService orderService;
+	@Autowired
+	private CounterService counterservice;
+	/**
+	 * 默认列表页
+	 * @return
+	 */
+	@RequestMapping(value="list")
+	public String list(Model model){
+		 
+        List<String> country = orderService.getCountryVlueAndText();
+        List<CounterEntity> listeounter = counterservice.getList();
+        
+		model.addAttribute("country",country);
+		model.addAttribute("counterlist",listeounter);
+        
+		return "equipment/equipment_list";
+	}
+	
+	/**
+	 * 获取所有设备
+	 * @return
+	 */
+	@RequestMapping(value="getAll")
+	public String lists(){
+		return "equipment/equipment_lists";
+	}
+	
+	@RequestMapping(value="getAllLists")
+	public @ResponseBody String queryEquipmentList(String page,String rows){
+		//当前页  
+        int intPage = Integer.parseInt((page == null || page == "0") ? "1":page);  
+        //每页显示条数  
+        int number = Integer.parseInt((rows == null || rows == "0") ? "10":rows);  
+        //每页的开始记录  第一页为1  第二页为number +1   
+        if(intPage<=0)
+        	intPage = 1;
+        int start = (intPage-1)*number;  
+        int total = equipmentservice.queryEquipmentRows();
+        
+		List<EquipmentEntity> lists = new ArrayList<EquipmentEntity>();
+		lists = equipmentservice.queryEquipmentByPage(start, number);
+		for(EquipmentEntity ee:lists){
+			ee.setIs_valid(isValid(ee.getIs_valid()));
+			if(ee.getRent_begindate()!=null)
+			ee.setRent_begindate(subDate(ee.getRent_begindate()));
+			if(ee.getRent_enddate()!=null)
+			ee.setRent_enddate(subDate(ee.getRent_enddate()));
+			if(ee.getRent_expectdate()!=null)
+			ee.setRent_expectdate(subDate(ee.getRent_expectdate()));
+			if(ee.getScrap_date()!=null)
+			ee.setScrap_date(subDate(ee.getScrap_date()));
+			if(ee.getStock_date()!=null)
+			ee.setStock_date(subDate(ee.getStock_date()));
+			if(ee.getCreate_time()!=null)
+			ee.setCreate_time(subDate(ee.getCreate_time()));
+			if(ee.getModify_time()!=null)
+			ee.setModify_time(subDate(ee.getModify_time()));
+			ee.setCounterid(equipmentservice.queryCounterName(ee.getCounterid()));
+			ee.setD_country(orderService.queryDcountry(ee.getNo()));
+			ee.setDeposit(equipmentservice.queryDepositByEtype(ee.getEquipment_type()));
+		} 
+		
+		Map map = new HashMap();
+		map.put("total", total);
+		map.put("rows", lists);
+		
+		return JSON.toJSONString(map);
+	}
+	/**
+	 * 获取可用设备列表
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value="getlist")
+	public @ResponseBody String queryOrder(Model model,String page,String rows,HttpServletRequest request){
+		//当前页  
+        int intPage = Integer.parseInt((page == null || page == "0") ? "1":page);  
+        //每页显示条数  
+        int number = Integer.parseInt((rows == null || rows == "0") ? "10":rows);  
+        //每页的开始记录  第一页为1  第二页为number +1   
+        if(intPage<=0)
+        	intPage = 1;
+        int start = (intPage-1)*number;  
+        int total = equipmentservice.queryEquipmentInvalidRows();
+        
+        HttpSession session = request.getSession();
+        CounterEntity ce = (CounterEntity) session.getAttribute("counters");
+       
+		List<EquipmentEntity> lists = new ArrayList<EquipmentEntity>();
+		//System.out.println(session.getAttribute("gradetype"));
+		if(session.getAttribute("gradetype").equals("0000")){
+			lists = equipmentservice.getList(start, number);
+		}else{
+			lists = equipmentservice.getNowList(start, number, ce.getId());
+		}
+		for(EquipmentEntity ee:lists){
+			ee.setIs_valid(isValid(ee.getIs_valid()));
+			if(ee.getRent_begindate()!=null)
+			ee.setRent_begindate(subDate(ee.getRent_begindate()));
+			if(ee.getRent_enddate()!=null)
+			ee.setRent_enddate(subDate(ee.getRent_enddate()));
+			if(ee.getRent_expectdate()!=null)
+			ee.setRent_expectdate(subDate(ee.getRent_expectdate()));
+			if(ee.getScrap_date()!=null)
+			ee.setScrap_date(subDate(ee.getScrap_date()));
+			if(ee.getStock_date()!=null)
+			ee.setStock_date(subDate(ee.getStock_date()));
+			if(ee.getCreate_time()!=null)
+			ee.setCreate_time(subDate(ee.getCreate_time()));
+			if(ee.getModify_time()!=null)
+			ee.setModify_time(subDate(ee.getModify_time()));
+			//System.out.println(ee.getCounterid()+":"+ee.getNo()+":"+ee.getEquipment_type());
+			ee.setCounterid(equipmentservice.queryCounterName(ee.getCounterid()));
+			String countryd = orderService.queryDcountry(ee.getNo());
+			ee.setD_country(countryd);
+			if(ee.getEquipment_type().equals("0001"))
+			ee.setDeposit(equipmentservice.queryDepositByEtype("内部设备"));
+			//System.out.println(ee.getDeposit());
+			/*Map<String,String> countrys = infoservice.queryD_country(ee.getNo());
+			if(countrys!=null){
+				ee.setD_country(countrys.get("ITEM_TEXT"));
+			}*/
+		} 
+		Map map = new HashMap();
+		map.put("total", total);
+		map.put("rows", lists);
+		return JSON.toJSONString(map);
+	}
+		
+	/**
+	 * 根据订单修改设备信息
+	 * @param equipment_no 设备号
+	 * @param rent_enddate 退还时间
+	 * @param cost_sum 设备租金
+	 * @param remark 备注
+	 * @return
+	 */
+	/*@RequestMapping(value="update_equipment",method=RequestMethod.POST)
+	public String update_equipment(String equipment_no,String rent_enddate,BigDecimal cost_sum,String remark){
+		equipmentservice.updateEquipment(equipment_no, rent_enddate, cost_sum, remark);
+		return "equipment/equipment_list";
+	}*/
+	/**
+	 * 根据设备号查询日租金
+	 * @param equipment_no
+	 * @return
+	 */
+	@RequestMapping(value="dayRent")
+	public @ResponseBody String queryDayRent(String equipment_no,String equipment_type){
+		List list = new ArrayList();
+		String eqip_type ="";
+		if(equipment_type.equals("0001")){
+			eqip_type="内部设备";
+			EquipmentEntity bd = equipmentservice.queryDayRent(equipment_no);
+			Map<String,String> ie = infoservice.queryD_country(equipment_no);
+			list.add(bd);
+			list.add(ie);
+		}else if(equipment_type.equals("0002")){
+			String countryvalue = equipment_no.substring(0,2);
+			Map<String,String> dayrent = equipmentservice.queryOutEquipDayRent(countryvalue);
+			list.add(dayrent);
+			eqip_type="外部设备";
+		}
+		String deposit = equipmentservice.queryDepositByEtype(eqip_type);
+		list.add(deposit);
+		//System.out.println(bd);
+//		String ee  =  JSONUtils.toJSONString(bd);
+		//String jsons = "{'id':'"+bd.getId()+"','day_rent':'"+bd.getDay_rent()+"'}";
+		//System.out.println(bd);
+		//System.out.println(JSONUtils.toJSONString(bd));
+		//System.out.println(JSONUtils.toJSONString(bd));
+		//String jsons = JSON.toJSONString(bd);
+		String jsons = JSON.toJSONString(list);
+		return jsons;
+	}
+	
+	/**
+	 * 根据设备号，或者柜台号，或者国家查询
+	 * @param no 设备号
+	 * @param counterid 柜台号
+	 * @param countrys 国家
+	 * @return
+	 */
+	@RequestMapping(value="query")
+	public @ResponseBody String queryEquipmentByNum(String no,String countercode,String countrys,String page,String rows,String type,String equipment_state){
+		List<EquipmentEntity> list = new ArrayList<EquipmentEntity>();
+		//当前页  
+        int intPage = Integer.parseInt((page == null || page == "0") ? "1":page);  
+        //每页显示条数  
+        int number = Integer.parseInt((rows == null || rows == "0") ? "10":rows);  
+        //每页的开始记录  第一页为1  第二页为number +1   
+        if(intPage<=0)
+        	intPage = 1;
+        int start = (intPage-1)*number;  
+        if(StringUtils.isEmpty(no) && StringUtils.isEmpty(countercode) && StringUtils.isEmpty(countrys) && StringUtils.isEmpty(equipment_state)){
+			list = equipmentservice.getList(start, number);
+		}else  if(StringUtils.isEmpty(no) && StringUtils.isEmpty(countercode) && StringUtils.isEmpty(countrys) && "1".equals(type)){
+        	list = equipmentservice.queryEquipmentByPage(start, number);
+        }else{
+        	Map map = new HashMap();
+        	map.put("no", no.trim());
+        	map.put("countercode", countercode);
+        	map.put("countrys", countrys);
+        	map.put("equipment_state", equipment_state);
+        	map.put("start", start);
+        	map.put("number", number);
+			list = equipmentservice.queryEquipmentByNum(map);
+		}
+        int total = list.size();
+		if(list.size()>0){
+			for(EquipmentEntity ee:list){
+				ee.setIs_valid(isValid(ee.getIs_valid()));
+				ee.setCounterid(equipmentservice.queryCounterName(ee.getCounterid()));
+				ee.setD_country(orderService.queryDcountry(ee.getNo()));
+				if(ee.getEquipment_type().equals("0001"))
+					ee.setDeposit(equipmentservice.queryDepositByEtype("内部设备"));
+			} 
+		}
+		return JSON.toJSONString(list);
+	}
+	
+	@RequestMapping(value="add")
+	public String addEquip(){
+		return "equipment/equipment_add";
+	}
+	
+	@RequestMapping(value="add",method=RequestMethod.POST)
+	public String addEquipment(Model model,EquipmentEntity equipment){
+		equipmentservice.addEquipment(equipment);
+		return "equipment/equipment_add";
+	}
+	
+	@RequestMapping(value="isExist",method=RequestMethod.POST)
+	public @ResponseBody String isExist(String equipment_no){
+		int i = equipmentservice.isExist(equipment_no);
+		return i>=1?"0":"1";//0存在1不存在
+	}
+	
+	//判断设备是否有效0001有效，0002无效
+	public String isValid(String isValid){
+		if(isValid.equals("0001")){
+			return "有效";
+		}else{
+			return "无效";
+		}
+	}
+	
+	//截取二期最后一个.0
+	public  static String subDate(String dates){
+		return dates.substring(0,dates.length()-2);
+	}
+	
+}

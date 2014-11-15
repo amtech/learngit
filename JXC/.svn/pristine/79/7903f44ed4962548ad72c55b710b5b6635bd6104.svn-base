@@ -1,0 +1,736 @@
+package com.jxc.web.user.ctrl;
+
+import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.apache.poi.hssf.usermodel.HSSFDataFormatter;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
+
+import com.alibaba.druid.util.StringUtils;
+import com.alibaba.fastjson.JSON;
+import com.jxc.web.user.model.CounterEntity;
+import com.jxc.web.user.model.EquipmentEntity;
+import com.jxc.web.user.model.InfoEntity;
+import com.jxc.web.user.service.CounterService;
+import com.jxc.web.user.service.EquipmentService;
+import com.jxc.web.user.service.InfoService;
+import com.jxc.web.user.service.OrderService;
+
+@Controller
+@RequestMapping("equipment")
+public class EquipmentCtl {
+	@Autowired
+	private EquipmentService equipmentservice;
+	@Autowired
+	private InfoService infoservice;
+	@Autowired
+	private OrderService orderService;
+	@Autowired
+	private CounterService counterservice;
+	/**
+	 * 默认列表页
+	 * @return
+	 */
+	@RequestMapping(value="list")
+	public String list(Model model){
+		 
+        List<String> country = orderService.getCountryVlueAndText();
+        List<CounterEntity> listeounter = counterservice.getList();
+       
+		model.addAttribute("country",country);
+		model.addAttribute("counterlist",listeounter);
+	
+		return "equipment/equipment_list";
+	}
+	
+	/**
+	 * 获取所有设备
+	 * @return
+	 */
+	@RequestMapping(value="getAll")
+	public String lists(Model model,HttpServletRequest request){
+		 List<String> country = orderService.getCountryVlueAndText();
+	     List<CounterEntity> listeounter = counterservice.getList();
+	     HttpSession session = request.getSession();
+	     CounterEntity ce = (CounterEntity) session.getAttribute("counters");
+	     String countername = "";
+	     if(ce.getCounter_code()!=null){
+	    	 countername = equipmentservice.queryCounterName(ce.getCounter_code());
+	     }
+	     
+	     model.addAttribute("countercode",ce.getCounter_code());
+	     model.addAttribute("countername",countername);
+	 	 model.addAttribute("country",country);
+	     model.addAttribute("counterlist",listeounter);
+		 return "equipment/equipment_lists";
+	}
+	
+	@RequestMapping(value="getAllLists",method=RequestMethod.POST)
+	public @ResponseBody String queryEquipmentList(String page,String rows,HttpServletRequest request){
+		//当前页  
+        int intPage = Integer.parseInt((page == null || page == "0") ? "1":page);  
+        //每页显示条数  
+        int number = Integer.parseInt((rows == null || rows == "0") ? "10":rows);  
+        //每页的开始记录  第一页为1  第二页为number +1   
+        if(intPage<=0)
+        	intPage = 1;
+        int start = (intPage-1)*number;  
+        
+        HttpSession session = request.getSession();
+        String gradetype = (String) session.getAttribute("gradetype");
+        CounterEntity ce = (CounterEntity) session.getAttribute("counters");
+        
+        int total = equipmentservice.queryEquipmentRows(ce.getCounter_code());
+		List<EquipmentEntity> lists = new ArrayList<EquipmentEntity>();
+		lists = equipmentservice.queryEquipmentByPage(start, number,ce.getCounter_code());
+		for(EquipmentEntity ee:lists){
+			ee.setIs_valid(isValid(ee.getIs_valid()));
+			if(ee.getRent_begindate()!=null)
+			ee.setRent_begindate(subDate(ee.getRent_begindate()));
+			if(ee.getRent_enddate()!=null)
+			ee.setRent_enddate(subDate(ee.getRent_enddate()));
+			if(ee.getRent_expectdate()!=null)
+			ee.setRent_expectdate(subDate(ee.getRent_expectdate()));
+			if(ee.getScrap_date()!=null)
+			ee.setScrap_date(subDate(ee.getScrap_date()));
+			if(ee.getStock_date()!=null)
+			ee.setStock_date(subDate(ee.getStock_date()));
+			if(ee.getCreate_time()!=null)
+			ee.setCreate_time(subDate(ee.getCreate_time()));
+			if(ee.getModify_time()!=null)
+			ee.setModify_time(subDate(ee.getModify_time()));
+			ee.setCounterid(equipmentservice.queryCounterName(ee.getCounterid()));
+			ee.setD_country(orderService.queryDcountry(ee.getNo()));
+			if("0001".equals(ee.getEquipment_type())){
+				ee.setEquipment_type("内部设备");
+				ee.setDeposit(equipmentservice.queryDepositByEtype("内部设备"));
+				InfoEntity ies = infoservice.queryInfoById(ee.getSim_id());
+				if(ies != null){
+					String dayrent = ies.getDay_rent();
+					if(dayrent!=null){
+						ee.setDay_rent(dayrent);
+					}
+				}
+			}else{
+				ee.setDeposit(equipmentservice.queryDepositByEtype("外部设备"));
+				ee.setEquipment_type("外部设备");
+			}
+			if("0001".equals(ee.getEquipment_state())){
+				ee.setEquipment_state("可用");
+			}else{
+				ee.setEquipment_state("已租");
+			}
+			if(ee.getSim_id()!=null){
+				ee.setSim_id("已绑定");
+			}else{
+				ee.setSim_id("未绑定");
+			}
+			
+		} 
+		
+		Map map = new HashMap();
+		map.put("total", total);
+		map.put("rows", lists);
+		
+		return JSON.toJSONString(map);
+	}
+	/**
+	 * 获取可用设备列表
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value="getlist")
+	public @ResponseBody String queryOrder(Model model,String page,String rows,HttpServletRequest request){
+		Map getlist = new HashMap();
+		//当前页  
+        int intPage = Integer.parseInt((page == null || page == "0") ? "1":page);  
+        //每页显示条数  
+        int number = Integer.parseInt((rows == null || rows == "0") ? "10":rows);  
+        //每页的开始记录  第一页为1  第二页为number +1   
+        if(intPage<=0)
+        	intPage = 1;
+        int start = (intPage-1)*number;  
+        int total = equipmentservice.queryEquipmentInvalidRows();
+        
+        HttpSession session = request.getSession();
+        String gradetype = (String) session.getAttribute("gradetype");
+        CounterEntity ce = (CounterEntity) session.getAttribute("counters");
+       
+		List<EquipmentEntity> lists = new ArrayList<EquipmentEntity>();
+		getlist.put("start", start);
+		getlist.put("number", number);
+		//System.out.println(session.getAttribute("gradetype"));
+		if(gradetype.equals("0000")){
+			lists = equipmentservice.getList(getlist);
+		}else{
+			lists = equipmentservice.getNowList(start, number, ce.getCounter_code());
+		}
+		for(EquipmentEntity ee:lists){
+			ee.setIs_valid(isValid(ee.getIs_valid()));
+			if(ee.getRent_begindate()!=null)
+			ee.setRent_begindate(subDate(ee.getRent_begindate()));
+			if(ee.getRent_enddate()!=null)
+			ee.setRent_enddate(subDate(ee.getRent_enddate()));
+			if(ee.getRent_expectdate()!=null)
+			ee.setRent_expectdate(subDate(ee.getRent_expectdate()));
+			if(ee.getScrap_date()!=null)
+			ee.setScrap_date(subDate(ee.getScrap_date()));
+			if(ee.getStock_date()!=null)
+			ee.setStock_date(subDate(ee.getStock_date()));
+			if(ee.getCreate_time()!=null)
+			ee.setCreate_time(subDate(ee.getCreate_time()));
+			if(ee.getModify_time()!=null)
+			ee.setModify_time(subDate(ee.getModify_time()));
+			//System.out.println(ee.getCounterid()+":"+ee.getNo()+":"+ee.getEquipment_type());
+			ee.setCounterid(equipmentservice.queryCounterName(ee.getCounterid()));
+			String countryd = orderService.queryDcountry(ee.getNo());
+			ee.setD_country(countryd);
+			if(ee.getEquipment_type().equals("0001")){
+			ee.setDeposit(equipmentservice.queryDepositByEtype("内部设备"));
+			InfoEntity ies = infoservice.queryInfoById(ee.getSim_id());
+			if(ies != null){
+				String dayrent = ies.getDay_rent();
+				if(dayrent!=null){
+					ee.setDay_rent(dayrent);
+				}
+			}
+			}
+			//System.out.println(ee.getDeposit());
+			/*Map<String,String> countrys = infoservice.queryD_country(ee.getNo());
+			if(countrys!=null){
+				ee.setD_country(countrys.get("ITEM_TEXT"));
+			}*/
+		} 
+		Map map = new HashMap();
+		map.put("total", total);
+		map.put("rows", lists);
+		return JSON.toJSONString(map);
+	}
+		
+	/**
+	 * 根据订单修改设备信息
+	 * @param equipment_no 设备号
+	 * @param rent_enddate 退还时间
+	 * @param cost_sum 设备租金
+	 * @param remark 备注
+	 * @return
+	 */
+	/*@RequestMapping(value="update_equipment",method=RequestMethod.POST)
+	public String update_equipment(String equipment_no,String rent_enddate,BigDecimal cost_sum,String remark){
+		equipmentservice.updateEquipment(equipment_no, rent_enddate, cost_sum, remark);
+		return "equipment/equipment_list";
+	}*/
+	/**
+	 * 根据设备号查询日租金
+	 * @param equipment_no
+	 * @return
+	 */
+	@RequestMapping(value="dayRent")
+	public @ResponseBody String queryDayRent(String equipment_no,String equipment_type){
+		List list = new ArrayList();
+		if(equipment_no.length()==11){
+			equipment_type = "0002";
+		}else{
+			equipment_type="0001";
+		}
+		String eqip_type ="";
+		if(equipment_type.equals("0001")){
+			eqip_type="内部设备";
+			EquipmentEntity bd = equipmentservice.queryDayRent(equipment_no);
+			Map<String,String> ie = infoservice.queryD_country(equipment_no);
+			list.add(bd);
+			list.add(ie);
+		}else if(equipment_type.equals("0002")){
+			String countryvalue = equipment_no.substring(0,2);
+			Map<String,String> dayrent = equipmentservice.queryOutEquipDayRent(countryvalue);
+			list.add(dayrent);
+			eqip_type="外部设备";
+		}
+		String deposit = equipmentservice.queryDepositByEtype(eqip_type);
+		list.add(deposit);
+		//System.out.println(bd);
+//		String ee  =  JSONUtils.toJSONString(bd);
+		//String jsons = "{'id':'"+bd.getId()+"','day_rent':'"+bd.getDay_rent()+"'}";
+		//System.out.println(bd);
+		//System.out.println(JSONUtils.toJSONString(bd));
+		//System.out.println(JSONUtils.toJSONString(bd));
+		//String jsons = JSON.toJSONString(bd);
+		String jsons = JSON.toJSONString(list);
+		return jsons;
+	}
+	
+	/**
+	 * 根据设备号，或者柜台号，或者国家查询
+	 * @param no 设备号
+	 * @param counterid 柜台号
+	 * @param countrys 国家
+	 * @return
+	 */
+	@RequestMapping(value="query")
+	public @ResponseBody String queryEquipmentByNum(String no,String countercode,String countrys,String page,String rows,String type,String equipment_state){
+		List<EquipmentEntity> list = new ArrayList<EquipmentEntity>();
+		//当前页  
+        int intPage = Integer.parseInt((page == null || page == "0") ? "1":page);  
+        //每页显示条数  
+        int number = Integer.parseInt((rows == null || rows == "0") ? "10":rows);  
+        //每页的开始记录  第一页为1  第二页为number +1   
+        if(intPage<=0)
+        	intPage = 1;
+        int start = (intPage-1)*number;  
+        int total = 0;
+        if(StringUtils.isEmpty(no) && StringUtils.isEmpty(countercode) && StringUtils.isEmpty(countrys) && "1".equals(type)){
+        	list = equipmentservice.queryEquipmentByPage(start, number,countercode);
+        }else{
+        	Map map = new HashMap();
+        	map.put("no", no.trim());
+        	map.put("countercode", countercode);
+        	map.put("countrys", countrys);
+        	map.put("equipment_state", equipment_state);
+        	map.put("start", start);
+        	map.put("number", number);
+			list = equipmentservice.queryEquipmentByNum(map);
+			total = equipmentservice.queryEquipmentByNumTotal(map);
+		}
+		if(list.size()>0){
+			for(EquipmentEntity ee:list){
+				ee.setIs_valid(isValid(ee.getIs_valid()));
+				ee.setCounterid(equipmentservice.queryCounterName(ee.getCounterid()));
+				ee.setD_country(orderService.queryDcountry(ee.getNo()));
+				if(ee.getEquipment_type().equals("0001"))
+					ee.setDeposit(equipmentservice.queryDepositByEtype("内部设备"));
+			} 
+		}
+		Map maps = new HashMap();
+		maps.put("total", total);
+		maps.put("rows", list);
+		return JSON.toJSONString(maps);
+	}
+	
+	@RequestMapping(value="add")
+	public String addEquip(Model model){
+		List<CounterEntity> listeounter = counterservice.getList();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd hh:mm:ss");
+		String stock_date = sdf.format(new Date());
+		model.addAttribute("counterlist",listeounter);
+		model.addAttribute("stock_date",stock_date);
+		return "equipment/equipment_add";
+	}
+	
+	@RequestMapping(value="add",method=RequestMethod.POST)
+	public @ResponseBody String addEquipment(Model model,EquipmentEntity equipment){
+		if(equipment.getNo().length()==11){
+			equipment.setDeposit("02");
+		}else{
+			equipment.setDeposit("01");
+		}
+		equipmentservice.addEquipment(equipment);
+		String stock_date = equipment.getStock_date();
+		List<CounterEntity> listeounter = counterservice.getList();
+		model.addAttribute("stock_date",stock_date);
+		model.addAttribute("counterlist",listeounter);
+		return "1";
+	}
+	
+	@RequestMapping(value="isExist",method=RequestMethod.POST)
+	public @ResponseBody String isExist(String equipment_no){
+		int i = equipmentservice.isExist(equipment_no);
+		return i>=1?"0":"1";//0存在1不存在
+	}
+	
+	@RequestMapping(value="detail")
+	public String detail(Model model,String no){
+		Map map = new HashMap();
+		String equipmenttype = "0001";
+		if(no.length()==11){
+			equipmenttype = "0002";
+		}
+		map.put("equipmentno", no);
+		map.put("equipmenttype", equipmenttype);
+		EquipmentEntity ee = equipmentservice.queryEquipmentDetail(map);
+		if(ee.getRent_begindate()!=null)
+		ee.setRent_begindate(subDate(ee.getRent_begindate()));
+		if(ee.getRent_enddate()!=null)
+		ee.setRent_enddate(subDate(ee.getRent_enddate()));
+		if(ee.getRent_expectdate()!=null)
+		ee.setRent_expectdate(subDate(ee.getRent_expectdate()));
+		if(ee.getScrap_date()!=null)
+		ee.setScrap_date(subDate(ee.getScrap_date()));
+		if(ee.getStock_date()!=null)
+		ee.setStock_date(subDate(ee.getStock_date()));
+		if(ee.getCreate_time()!=null)
+		ee.setCreate_time(subDate(ee.getCreate_time()));
+		if(ee.getModify_time()!=null)
+		ee.setModify_time(subDate(ee.getModify_time()));
+		ee.setIs_valid(isValid(ee.getIs_valid()));
+		ee.setCounterid(equipmentservice.queryCounterName(ee.getCounterid()));
+		ee.setD_country(orderService.queryDcountry(ee.getNo()));
+		String equipment_state = ee.getEquipment_state();
+		if("0001".equals(equipment_state)){
+			ee.setEquipment_state("可用");
+		}else if("0002".equals(equipment_state)){
+			ee.setEquipment_state("已租");
+		}else if("0003".equals(equipment_state)){
+			ee.setEquipment_state("预定");
+		}
+		if(ee.getEquipment_type().equals("0001")){
+			ee.setEquipment_type("内部设备");
+			ee.setDeposit(equipmentservice.queryDepositByEtype("内部设备"));
+		}else{
+			ee.setEquipment_type("外部设备");
+			ee.setDeposit(equipmentservice.queryDepositByEtype("外部设备"));
+		}
+		model.addAttribute("equipment",ee);
+		return "equipment/equipment_detail";
+	}
+	
+	@RequestMapping(value="edit")
+	public String edit(Model model,String no){
+		List<CounterEntity> listeounter = counterservice.getList();
+		model.addAttribute("counterlist",listeounter);
+		Map map = new HashMap();
+		String equipmenttype = "0001";
+		if(no.length()==11){
+			equipmenttype = "0002";
+		}
+		map.put("equipmentno", no);
+		map.put("equipmenttype", equipmenttype);
+		EquipmentEntity ee = equipmentservice.queryEquipmentDetail(map);
+		if(ee.getRent_begindate()!=null)
+		ee.setRent_begindate(subDate(ee.getRent_begindate()));
+		if(ee.getRent_enddate()!=null)
+		ee.setRent_enddate(subDate(ee.getRent_enddate()));
+		if(ee.getRent_expectdate()!=null)
+		ee.setRent_expectdate(subDate(ee.getRent_expectdate()));
+		if(ee.getScrap_date()!=null)
+		ee.setScrap_date(subDate(ee.getScrap_date()));
+		if(ee.getStock_date()!=null)
+		ee.setStock_date(subDate(ee.getStock_date()));
+		if(ee.getCreate_time()!=null)
+		ee.setCreate_time(subDate(ee.getCreate_time()));
+		if(ee.getModify_time()!=null)
+		ee.setModify_time(subDate(ee.getModify_time()));
+		model.addAttribute("is_valid",ee.getIs_valid());
+		ee.setIs_valid(isValid(ee.getIs_valid()));
+		model.addAttribute("counterid",ee.getCounterid());
+		ee.setCounterid(equipmentservice.queryCounterName(ee.getCounterid()));
+		ee.setD_country(orderService.queryDcountry(ee.getNo()));
+		String equipment_state = ee.getEquipment_state();
+		model.addAttribute("equipment_state",equipment_state);
+		if("0001".equals(equipment_state)){
+			ee.setEquipment_state("可用");
+		}else if("0002".equals(equipment_state)){
+			ee.setEquipment_state("已租");
+		}else if("0003".equals(equipment_state)){
+			ee.setEquipment_state("预定");
+		}
+		if(ee.getEquipment_type().equals("0001")){
+			ee.setEquipment_type("内部设备");
+			ee.setDeposit(equipmentservice.queryDepositByEtype("内部设备"));
+		}else{
+			ee.setEquipment_type("外部设备");
+			ee.setDeposit(equipmentservice.queryDepositByEtype("外部设备"));
+		}
+		model.addAttribute("equipment",ee);
+		return "equipment/equipment_edit";
+	}
+	
+	@RequestMapping(value="edit",method=RequestMethod.POST)
+	public @ResponseBody String editEquipment(EquipmentEntity equipment,String isbinding){
+		if(equipment.getScrap_date()==""){
+			equipment.setScrap_date(null);
+		}
+		if("1".equals(isbinding)){
+			Map map = new HashMap();
+			map.put("simid", equipment.getSim_id());
+			equipmentservice.updateBinding(map);
+		}
+		equipmentservice.editequipment(equipment);
+		return "1";
+	}
+	
+	@RequestMapping(value="querydayend")
+	public @ResponseBody String queryOuttime(String equipmentno){
+		String dayend = equipmentservice.querySimIsOuttime(equipmentno);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		String nowtime = sdf.format(new Date());
+		if(dayend==null){
+			return "0";
+		}
+		try {
+			Long end = sdf.parse(dayend).getTime();
+			Long now = sdf.parse(nowtime).getTime();
+			if(end<=now){
+				return "0";//过期
+			}
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "1";//未过期
+	}
+	
+	@RequestMapping(value="queryWithCondition",method=RequestMethod.POST)
+	public @ResponseBody String queryWithCondition(EquipmentEntity equipmentEntity,String page,String rows,String countrys){
+		System.out.println(equipmentEntity);
+		System.out.println(countrys);
+		//当前页  
+        int intPage = Integer.parseInt((page == null || page == "0") ? "1":page);  
+        //每页显示条数  
+        int number = Integer.parseInt((rows == null || rows == "0") ? "10":rows);  
+        //每页的开始记录  第一页为1  第二页为number +1   
+        if(intPage<=0)
+        	intPage = 1;
+        int start = (intPage-1)*number;  
+		
+		Map map = new HashMap();
+		map.put("equipment", equipmentEntity);
+		map.put("country", countrys);
+		map.put("start", start);
+		map.put("number", number);
+		//System.out.println(map);
+		int total = equipmentservice.queryEqptByConditionsNums(map);
+		List<EquipmentEntity> lists = equipmentservice.queryEqptByConditions(map);
+		for(EquipmentEntity ee:lists){
+			ee.setIs_valid(isValid(ee.getIs_valid()));
+			if(ee.getRent_begindate()!=null)
+			ee.setRent_begindate(subDate(ee.getRent_begindate()));
+			if(ee.getRent_enddate()!=null)
+			ee.setRent_enddate(subDate(ee.getRent_enddate()));
+			if(ee.getRent_expectdate()!=null)
+			ee.setRent_expectdate(subDate(ee.getRent_expectdate()));
+			if(ee.getScrap_date()!=null)
+			ee.setScrap_date(subDate(ee.getScrap_date()));
+			if(ee.getStock_date()!=null)
+			ee.setStock_date(subDate(ee.getStock_date()));
+			if(ee.getCreate_time()!=null)
+			ee.setCreate_time(subDate(ee.getCreate_time()));
+			if(ee.getModify_time()!=null)
+			ee.setModify_time(subDate(ee.getModify_time()));
+			ee.setCounterid(equipmentservice.queryCounterName(ee.getCounterid()));
+			ee.setD_country(orderService.queryDcountry(ee.getNo()));
+			if("0001".equals(ee.getEquipment_type())){
+				ee.setEquipment_type("内部设备");
+				ee.setDeposit(equipmentservice.queryDepositByEtype("内部设备"));
+			}else{
+				ee.setDeposit(equipmentservice.queryDepositByEtype("外部设备"));
+				ee.setEquipment_type("外部设备");
+			}
+			if("0001".equals(ee.getEquipment_state())){
+				ee.setEquipment_state("可用");
+			}else{
+				ee.setEquipment_state("已租");
+			}
+			if(ee.getSim_id()!=null){
+				ee.setSim_id("已绑定");
+			}else{
+				ee.setSim_id("未绑定");
+			}
+			
+		} 
+		map.clear();
+		map.put("rows", lists);
+		map.put("total", total);
+		return JSON.toJSONString(map);
+	}
+	
+	@RequestMapping(value="uploadfile",method=RequestMethod.POST)
+	public String uploadfile(@RequestParam("resourcefile") CommonsMultipartFile file,HttpServletRequest request,Model model,String counterid)throws Exception{
+			List<EquipmentEntity> equipmentlist = new ArrayList<EquipmentEntity>();
+			HttpSession session = request.getSession();
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh-mm-ss");
+			String date = sdf.format(new Date());
+			String username = (String) session.getAttribute("realname");
+			String equipmentno = "";
+			String deposit = "01";//默认为自营设备
+			String equipment_type = "0001";//默认为自营设备
+			//CounterEntity counter = (CounterEntity) session.getAttribute("counters");
+			//String counterid = counter.getCounter_code();
+	        if(file.getContentType().equalsIgnoreCase("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")){
+	            List<String> equipmentnolist = readExcelTS(file.getInputStream());
+	            int j = equipmentnolist.size();
+	            int i = 0 ;
+	            while(i<j){
+	            	EquipmentEntity eqpt = new EquipmentEntity();
+	            	equipmentno = equipmentnolist.get(i);
+	            	if(equipmentno.length()==11){
+	            		deposit = "02";
+	            		equipment_type="0002";
+	            	}
+	            	eqpt.setId(UUID.randomUUID().toString().replace("-", ""));
+	            	eqpt.setNo(equipmentno);
+	            	eqpt.setStock_date(date);
+	            	eqpt.setIs_valid("0001");
+	            	eqpt.setCreate_time(date);
+	            	eqpt.setCreate_user(username);
+	            	eqpt.setModify_time(date);
+	            	eqpt.setModify_user(username);
+	            	eqpt.setDeposit(deposit);
+	            	eqpt.setEquipment_state("0001");
+	            	eqpt.setEquipment_type(equipment_type);
+	            	eqpt.setCounterid(counterid);
+                	equipmentlist.add(eqpt);
+                	i++;
+	            }
+	            if(!queryIsDouble(equipmentnolist)){
+	            	model.addAttribute("status","1");
+					return "equipment/overthrough";
+	            }
+	            //先将数据添加到临时表，然后测试表中的数据
+	            equipmentservice.batchInsertTemporatoryEqupment(equipmentlist);
+	            List<String> tempeqptno = equipmentservice.queryEqptnoTemporatory();
+	            for(String no : tempeqptno){
+	            	Map map = new HashMap();
+	            	map.put("no", no);
+	            	int l = equipmentservice.queryIfDoubleData(map);
+	            	if(l>0){
+	            		model.addAttribute("status","1");
+						return "equipment/overthrough";
+	            	}
+	            }
+	            //如果无误，将数据添加到正式表
+	            equipmentservice.batchInsertEqupment(equipmentlist);
+	            model.addAttribute("status","0");
+	        }else{
+	        	try{
+	        	List<String> eq = new ArrayList<String>();//保存所有的设备号
+	            HSSFWorkbook wb = new HSSFWorkbook(file.getInputStream());
+	            HSSFDataFormatter hs = new HSSFDataFormatter();
+	            HSSFSheet sheet = wb.getSheetAt(0);
+	            Iterator<Row> rowIterator = sheet.rowIterator();
+	            rowIterator.next();//第一行为标题,过滤掉
+	            while (rowIterator.hasNext()) {//遍历查询每一行
+	                Row row = rowIterator.next();//遍历查询每一列
+	                if(row.getCell(0) != null){
+	                	//System.out.println(row.getCell(0).getStringCellValue());
+	                	equipmentno = row.getCell(0).getStringCellValue();
+	                	eq.add(equipmentno);
+	                	if(equipmentno.length()==11){
+	                		deposit = "02";
+	                		equipment_type = "0002";
+	                	}
+	                	EquipmentEntity ee = new EquipmentEntity();
+	                	ee.setId(UUID.randomUUID().toString().replace("-", ""));
+	                	ee.setNo(equipmentno);
+	                	ee.setStock_date(date);
+	                	ee.setIs_valid("0001");
+	                	ee.setCreate_time(date);
+	                	ee.setCreate_user(username);
+	                	ee.setModify_time(date);
+	                	ee.setModify_user(username);
+	                	ee.setDeposit(deposit);
+	                	ee.setEquipment_state("0001");
+	                	ee.setEquipment_type(equipment_type);
+	                	ee.setCounterid(counterid);
+	                	equipmentlist.add(ee);
+	                }
+	               }
+	            System.out.println("执行到检测XLS表中数据"+queryIsDouble(eq));
+				if(!queryIsDouble(eq)){
+					model.addAttribute("status","1");
+					return "equipment/overthrough";
+				}
+	            //先将数据添加到临时表，然后测试表中的数据
+	            equipmentservice.batchInsertTemporatoryEqupment(equipmentlist);
+	            System.out.println("执行完插入临时表");
+	            List<String> tempeqptnos = equipmentservice.queryEqptnoTemporatory();
+	            System.out.println("========================="+tempeqptnos);
+				for(String no : tempeqptnos){
+	            	Map map = new HashMap();
+	            	map.put("no", no);
+	            	int l = equipmentservice.queryIfDoubleData(map);
+	            	if(l>0){
+	            		model.addAttribute("status","1");
+						return "equipment/overthrough";
+	            	}
+	            }
+	            //如果无误，将数据添加到正式表
+	            equipmentservice.batchInsertEqupment(equipmentlist);
+	            model.addAttribute("status","0");
+	            //System.out.println("====================执行到这了！！！！！！");
+	        //return "schedule/curriculum_list";
+	        }catch(Exception e){
+	        	model.addAttribute("status","-1");
+	        }
+	       }
+	        return "equipment/overthrough";
+	}
+	
+	/**
+	 * 读取EXCEL 2007 表单方法
+	 */
+	public List<String> readExcelTS(InputStream file){
+        List<String> equipmentnolist = new ArrayList<String>();//存放所有设备号
+        try{
+        XSSFWorkbook xwb = new XSSFWorkbook(file);
+        //读取第一章表格的内容
+        XSSFSheet sheet = xwb.getSheetAt(0);
+        Object value = null;
+        XSSFRow row = null;
+        XSSFCell cell = null;
+        for(int k = 1; k<=sheet.getLastRowNum();k++){//第一行为标题，默认从第二行开始读取
+            row = sheet.getRow(k);
+            equipmentnolist.add(row.getCell(0).getStringCellValue());
+        }
+        return equipmentnolist;
+        }catch(Exception e){
+            e.printStackTrace();
+            return null;
+        }
+	}
+	
+	//判断设备是否有效0001有效，0002无效
+	public String isValid(String isValid){
+		if("0001".equals(isValid)){
+			return "有效";
+		}else{
+			return "无效";
+		}
+	}
+	
+	//截取二期最后一个.0
+	public  static String subDate(String dates){
+		return dates.substring(0,dates.length()-2);
+	}
+	
+	//判断一个LIST中的值是否有重复
+	public boolean queryIsDouble(List<String> list){
+		String temp = "";
+		 for (int i = 0; i < list.size() - 1; i++)
+	        {
+	            temp = list.get(i);
+	            for (int j = i + 1; j < list.size(); j++)
+	            {
+	                if (temp.equals(list.get(j)))
+	                {
+	                    return false;
+	                }
+	            }
+	        }
+		 return true;
+	}
+}

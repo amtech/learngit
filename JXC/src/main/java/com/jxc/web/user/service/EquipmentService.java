@@ -1,0 +1,250 @@
+package com.jxc.web.user.service;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.jxc.web.user.dao.EquipmentDao;
+import com.jxc.web.user.model.EquipmentEntity;
+import com.jxc.web.user.model.OrderEntity;
+
+@Service
+public class EquipmentService {
+	@Autowired
+	private EquipmentDao equipmentdao;
+	/**
+	 * 添加设备
+	 * @param equipment
+	 */
+	public void addEquipment(EquipmentEntity equipment){
+		equipmentdao.addequipment(equipment);
+	}
+	/**
+	 * 获取设备数据
+	 * @return
+	 */
+	public List<EquipmentEntity> getList(Map map){
+		return equipmentdao.getList(map);
+	}
+	/**
+	 * 根据设备号跟新设备归还日期，租金，备注
+	 * @param equipment_no 设备号
+	 * @param rent_enddate 归还日期
+	 * @param cost_sum 租金
+	 * @param remark 备注
+	 */
+	public void updateEquipment(String equipment_no, String rent_enddate,
+			BigDecimal cost_sum, String remark){
+			equipmentdao.updateEquipment(equipment_no, rent_enddate, cost_sum, remark);
+	}
+	/**
+	 * 根据设备号跟新设备归还日期，租金，备注 外部设备
+	 * @param equipment_no 设备号
+	 * @param rent_enddate 归还日期
+	 * @param cost_sum 租金
+	 * @param remark 备注
+	 */
+	public void updateEquipmentOut(String equipment_no, String rent_enddate,
+			BigDecimal cost_sum, String remark){
+			equipmentdao.updateEquipment(equipment_no, rent_enddate, cost_sum, remark);
+	}
+	/**
+	 * 根据设备号获取此设备日租金
+	 * @param deptno 设备号
+	 * @return
+	 */
+	public EquipmentEntity queryDayRent(String deptno){
+		return	equipmentdao.queryDayRent(deptno);
+	}
+	/**
+	 * 添加订单后跟新设备信息
+	 * @param equipment_no 设备号
+	 * @param rent_begindate 租用日期
+	 * @param rent_expectdate 预计返还日期
+	 * @param rent_enddate 实际返还日期
+	 * @param modify_user 更新人
+	 * @param modify_time 更新时间
+	 * @param remark 备注
+	 * @param total_rent 实际租金
+	 */
+	public void updateEquipmentAfterAdd(String equipment_no,String rent_begindate,String rent_expectdate,String rent_enddate,String modify_user,String modify_time,String remark,BigDecimal total_rent){
+		equipmentdao.updateEquipmentAfterAdd(equipment_no,rent_begindate,rent_expectdate,rent_enddate,modify_user,modify_time,remark,total_rent);
+	}
+	/**
+	 * 根据设备号查询设备是否有效
+	 * @param equipment_no
+	 * @return
+	 */
+	public List<EquipmentEntity> queryIsValid(String equipment_no){
+		return equipmentdao.queryIsValid(equipment_no);
+	}
+	/**
+	 * 根据设备号，柜台号，国家查询设备
+	 * @param no
+	 * @param counterid
+	 * @param tg_id
+	 * @return
+	 */
+	public List<EquipmentEntity> queryEquipmentByNum(Map map){
+		return equipmentdao.queryEquipmentByNum(map);
+	}
+	/**
+	 * 查询所有设备
+	 * @return
+	 */
+	public List<EquipmentEntity> getAll(){
+		return equipmentdao.getAll();
+	}
+	/**
+	 * 查询总条数
+	 * @return
+	 */
+	public int queryEquipmentRows(String counterid){
+		return equipmentdao.queryEquipmentRows(counterid);
+	}
+	/**
+	 * 分页查询
+	 * @param start
+	 * @param number
+	 * @return
+	 */
+	public List<EquipmentEntity> queryEquipmentByPage(int start, int number,String counterid){
+		return equipmentdao.queryEquipmentByPage(start, number,counterid);
+	}
+	/**
+	 * 查询有效总条数
+	 * @return
+	 */
+	public int queryEquipmentInvalidRows(){
+		return equipmentdao.queryEquipmentInvalidRows();
+	}
+	/**
+	 * 根据柜台号查询柜台名称
+	 * @param no
+	 * @return
+	 */
+	public String queryCounterName(String no){
+		return equipmentdao.queryCounterName(no);
+	}
+	/**
+	 * 查询当前柜台可用设备
+	 * @param start
+	 * @param number
+	 * @param counterid
+	 * @return
+	 */
+	public List<EquipmentEntity> getNowList(int start, int number,String counterid){
+		return equipmentdao.getNowList(start, number, counterid);
+	}
+	/**
+	 * 添加外部设备
+	 * @param no
+	 * @param counterid
+	 * @param is_valid
+	 * @param create_user
+	 * @param create_time
+	 * @param modify_user
+	 * @param modify_time
+	 * @param day_rent
+	 * @param deposit
+	 */
+	public void addOutEquipment(String no, String counterid, String is_valid, String create_user,String create_time, String modify_user,String modify_time,String day_rent,String deposit,String rent_begindate,String rent_expectdate,String total_rent){
+		equipmentdao.addOutEquipment(no,counterid,is_valid,create_user,create_time,modify_user,modify_time,day_rent,deposit,rent_begindate,rent_expectdate,total_rent);
+	}
+	/**
+	 * 根据设备类型查询设备押金
+	 * @param equipment_type
+	 * @return
+	 */
+	public String queryDepositByEtype(String equipment_type){
+		return equipmentdao.queryDepositByEtype(equipment_type);
+	}
+	/**
+	 * 判断设备是否存在，针对外部设备
+	 * @param equipment_no
+	 * @return
+	 */
+	public int isExist(String equipment_no){
+		return equipmentdao.isExist(equipment_no);
+	}
+	/**
+	 * 根据国家编码查询设备日租金，针对外部设备
+	 * @param countryvalue
+	 * @return
+	 */
+	public Map<String,String> queryOutEquipDayRent(String countryvalue){
+		return equipmentdao.queryOutEquipDayRent(countryvalue);
+	}
+	public int queryEquipmentByNumTotal(Map map){
+		return equipmentdao.queryEquipmentByNumTotal(map);
+	}
+	/**
+	 * 查看详情
+	 * @param map
+	 * @return
+	 */
+	public EquipmentEntity queryEquipmentDetail(Map map){
+		return equipmentdao.queryEquipmentDetail(map);
+	}
+	/**
+	 * 根据设备号查询该设备绑定的3G卡过期时间
+	 * @param equipmentno
+	 * @return
+	 */
+	public String querySimIsOuttime(String equipmentno){
+		return equipmentdao.querySimIsOuttime(equipmentno);
+	}
+	/**
+	 * 编辑设备
+	 * @param equipment
+	 */
+	public void editequipment(EquipmentEntity equipment){
+		//equipmentdao.editequipmentrefresh(equipment);
+		equipmentdao.editequipment(equipment);
+	}
+	/**
+	 * 根据条件查询设备
+	 * @param map
+	 * @return
+	 */
+	public List<EquipmentEntity> queryEqptByConditions(Map map){
+		return equipmentdao.queryEqptByConditions(map);
+	}
+	/**
+	 * 根据条件查询到设备的总条数
+	 * @param map
+	 * @return
+	 */
+	public int queryEqptByConditionsNums(Map map){
+		return equipmentdao.queryEqptByConditionsNums(map);
+	}
+	/**
+	 * 批量导入设备
+	 * @param list
+	 */
+	public void batchInsertEqupment(List<EquipmentEntity> list){
+		/*String sql = "CREATE TEMPORARY TABLE t_3g_equipments ( ID VARCHAR(40) NOT NULL, NO VARCHAR(50),COUNTERID VARCHAR(40),STOCK_DATE DATETIME,IS_VALID VARCHAR(4),CREATE_USER VARCHAR(40),CREATE_TIME DATETIME,MODIFY_USER VARCHAR(40),MODIFY_TIME DATETIME,EQUIPMENT_STATE VARCHAR(4),DEPOSIT VARCHAR(50) )";
+		Map map = new HashMap();
+		map.put("sql", sql);*/
+		//equipmentdao.createTemTable();
+		equipmentdao.batchInsertEqupment(list);
+	}
+	
+	public void batchInsertTemporatoryEqupment(List<EquipmentEntity> list){
+		equipmentdao.clearTemporatoryEqptno();
+		equipmentdao.batchInsertTemporatoryEqupment(list);
+	}
+	public void updateBinding(Map map){
+		equipmentdao.updateBinding(map);
+	}
+	public List<String> queryEqptnoTemporatory(){
+		return equipmentdao.queryEqptnoTemporatory();
+	}
+	public int queryIfDoubleData(Map map){
+		return equipmentdao.queryIfDoubleData(map);
+	}
+}

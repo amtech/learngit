@@ -1,0 +1,140 @@
+package com.jxc.web.user.dao.impl;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Repository;
+
+import com.jxc.core.web.dao.BaseDao;
+import com.jxc.web.user.dao.OrderDao;
+import com.jxc.web.user.model.OrderEntity;
+import com.jxc.web.user.service.OrderService;
+
+@Repository
+public class OrderDaoImpl extends BaseDao implements OrderDao {
+	
+	@Override
+	public void addOrder(OrderEntity order) {
+		// TODO Auto-generated method stub
+		this.getSqlSession().insert("addOrder",order);
+	}
+
+	@Override
+	public List<OrderEntity> queryOrder(Map map) {
+		
+		return this.getSqlSession().selectList("queryOrder",map);
+	}
+
+	//@Param("equipment_no")String equipment_no, @Param("rent_p_tel")String rent_p_tel
+	//String equipment_no,String rent_p_tel
+//	@Override
+//	public List<OrderEntity>  queryOrderByNum(String equipment_no, String rent_p_tel) {
+//		/*if("".equals(equipment_no.trim()))
+//			return this.getSqlSession().selectOne("queryOrderByNum",new Object[]{equipment_no,rent_p_tel});
+//		if("".trim().equals(rent_p_tel.trim()))
+//			return this.getSqlSession().selectOne("queryOrderByNum",equipment_no);
+//		OrderEntity oe = new OrderEntity();
+//		oe.setEquipment_no(equipment_no);
+//		oe.setRent_p_tel(rent_p_tel);
+//		return this.getSqlSession().selectOne("queryOrderByNum",oe);
+//		Map<Object,String> map = new HashMap<Object,String>();
+//		map.put("equipment_no", equipment_no);
+//		map.put("rent_p_tel", rent_p_tel);
+//		return this.getSqlSession().selectOne("queryOrderByNum",map);*/
+//		return this.getSqlSession().selectList("queryOrderByNum", new Object[]{equipment_no,rent_p_tel});
+//		/*OrderEntity oe = new OrderEntity();
+//		oe.setEquipment_no(equipment_no);
+//		oe.setRent_p_tel(rent_p_tel);
+//		return this.getSqlSession().selectOne("queryOrderByNum",oe);*/
+//	}
+
+	@Override
+	public List<OrderEntity> queryOrderByPage(Map map) {
+		return this.getSqlSession().selectList("queryOrderByPage", map);
+	}
+
+	@Override
+	public int queryOrderRows(Map map) {
+		return this.getSqlSession().selectOne("queryOrderRows");
+	}
+
+	@Override
+	public List<OrderEntity> queryOrderByNum(Map map) {
+		return this.getSqlSession().selectList("queryOrderByNum", map);
+	}
+
+	@Override
+	public String queryDcountry(String equipment_no) {
+		return this.getSqlSession().selectOne("queryDcountry",equipment_no);
+	}
+
+	@Override
+	public void updateOrder(OrderEntity oe) {
+		this.getSqlSession().update("updateOrder",oe);
+		
+	}
+
+	@Override
+	public List<String> getPayment() {
+		return this.getSqlSession().selectList("getPayment");
+	}
+
+	@Override
+	public String getCountry(String itemvalue) {
+		return this.getSqlSession().selectOne("getCountry",itemvalue);
+	}
+
+	@Override
+	public String getCountryCode(String itemtext) {
+		return this.getSqlSession().selectOne("getCountryCode",itemtext);
+	}
+
+	@Override
+	public String getPaymentText(String paymentvalue) {
+		return this.getSqlSession().selectOne("getPaymentText",paymentvalue);
+	}
+
+	@Override
+	public List<String> queryNationality() {
+		return this.getSqlSession().selectList("queryNationality");
+	}
+
+	@Override
+	public String queryNationText(String nationvalue) {
+		return this.getSqlSession().selectOne("queryNationText",nationvalue);
+	}
+
+	@Override
+	public List<OrderEntity> queryOrderWithConditons(Map map) {
+		return this.getSqlSession().selectList("queryOrderWithConditons",map);
+	}
+
+	@Override
+	public List<String> getCountryVlueAndText() {
+		return this.getSqlSession().selectList("getCountryVlueAndText");
+	}
+
+	@Override
+	public OrderEntity getDetailByOrderNum(Map map) {
+		return this.getSqlSession().selectOne("getDetailByOrderNum",map);
+	}
+
+	@Override
+	public int queryOrderWithConditonsTotal(Map map) {
+		return this.getSqlSession().selectOne("queryOrderWithConditonsTotal",map);
+	}
+
+	/*@Override
+	public OrderEntity queryOrderByNum(String sqls) {
+		// TODO Auto-generated method stub
+		return this.getSqlSession().selectOne("queryOrderByNum",sqls);
+	}*/
+
+	/*@Override
+	public void updateEquipment(String equipment_no, String rent_enddate,
+			String cost_sum, String remark) {
+		this.getSqlSession().update("updateEquipment", new Object[]{equipment_no,rent_enddate,cost_sum,remark});
+	}*/
+
+}

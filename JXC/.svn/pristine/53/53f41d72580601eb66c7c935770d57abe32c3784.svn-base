@@ -1,0 +1,54 @@
+package com.jxc.web.user.dao;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+
+import com.jxc.web.user.model.EquipmentEntity;
+import com.jxc.web.user.model.InfoEntity;
+import com.jxc.web.user.model.OrderEntity;
+
+public interface EquipmentDao {
+		//查询有效设备方法
+		public List<EquipmentEntity> getList(Map map);
+		//根据柜台号查询当前柜台有效设备方法
+		public List<EquipmentEntity> getNowList(int start,int number,String counterid);
+		//查询所有设备方法
+		public List<EquipmentEntity> getAll();
+		//根据订单中的设备号修改设备信息：设备返还日期，设备租金，备注
+		public abstract void updateEquipment(String equipment_no,String rent_enddate,BigDecimal cost_sum,String remark);
+ 		//根据订单中的设备号修改设备信息：设备返还日期，设备租金，备注 外部设备
+		public abstract void updateEquipmentOut(String equipment_no,String rent_enddate,BigDecimal cost_sum,String remark);
+		//根据设备号查询此设备的日租金
+		public EquipmentEntity queryDayRent(String deptno);
+		//在添加订单后跟新设备信息
+		public void updateEquipmentAfterAdd(String equipment_no,
+				String rent_begindate, String rent_expectdate,
+				String rent_enddate, String modify_user, String modify_time,
+				String remark, BigDecimal total_rent);
+		
+		//根据设备号查询当前设备是否有效
+		public EquipmentEntity queryIsValid(String equipment_no);
+		//根据设备号，柜台，国家查询设备
+		public List<EquipmentEntity> queryEquipmentByNum(Map map);
+		//根据设备号，柜台，国家查询到设备的总条数
+		public int queryEquipmentByNumTotal(Map map);
+		//查询总共条数的方法
+		public int queryEquipmentRows();
+		//根据当前页和每页的条数查询equipment
+		public List<EquipmentEntity> queryEquipmentByPage(int start,int number);
+		//查询有效的总条数
+		public int queryEquipmentInvalidRows();
+		//添加设备
+		public void addequipment(EquipmentEntity equip);
+		//根据柜台号查询柜台名称
+		public String queryCounterName(String no);
+		//添加外部设备
+		public void addOutEquipment(String no, String counterid, String is_valid, String create_user,String create_time, String modify_user,String modify_time,String day_rent,String deposit,String rent_begindate,String rent_expectdate,String total_rent);
+		//根据设备类型查询设备押金
+		public String queryDepositByEtype(String equipment_type);
+		//根据设备号判断设备是否存在，针对外部设备
+		public int isExist(String equipment_no);
+		//根据目的地国家编码查询设备日租金，针对外部设备
+		public Map<String,String> queryOutEquipDayRent(String countryvalue);
+}

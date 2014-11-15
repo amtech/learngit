@@ -1,0 +1,59 @@
+package com.jxc.web.user.ctrl;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.fastjson.JSON;
+import com.jxc.web.user.model.UserEntity;
+import com.jxc.web.user.service.UserService;
+/**
+  @File:           UserCtl.java
+  @Author:         WuF
+  @Version:        v 1.0
+  @Date:           2014年7月24日下午8:57:43
+  @Description:	菜单Controller
+ */
+@Controller
+@RequestMapping("user")
+public class UserCtl {
+	@Autowired
+	private UserService userService;
+	
+	/*@RequestMapping("/regist")
+	public String regist(){
+		return "regist";
+	}
+	
+	@RequestMapping(value="/regist",method=RequestMethod.POST)
+	public String regists(UserEntity users){
+		System.out.println(users);
+		userService.saveUser(users);
+		return "login";
+	}*/
+	
+	@RequestMapping("list")
+	public String queryUser(){
+		return "user/user_list";
+	}
+	
+	@RequestMapping("getList")
+	public @ResponseBody String getUser(){
+		List<UserEntity> list = new ArrayList<UserEntity>();
+		list = userService.queryUser();
+		String user = JSON.toJSONString(list);
+		return user;
+	}
+	
+	public UserService getUserService() {
+		return userService;
+	}
+
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
+}

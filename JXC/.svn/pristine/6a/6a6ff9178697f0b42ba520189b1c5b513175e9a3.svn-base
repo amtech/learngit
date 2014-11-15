@@ -1,0 +1,28 @@
+package com.jxc.web.user.dao;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import com.jxc.web.user.model.EquipmentEntity;
+import com.jxc.web.user.model.InfoEntity;
+
+public interface EquipmentDao {
+		//添加方法
+		public void add(EquipmentEntity equipment);
+		//查询方法
+		public List<EquipmentEntity> getList();
+		//根据订单中的设备号修改设备信息：设备返还日期，设备租金，备注
+		public abstract void updateEquipment(String equipment_no,String rent_enddate,BigDecimal cost_sum,String remark);
+		//根据设备号查询此设备的日租金
+		public EquipmentEntity queryDayRent(String deptno);
+		//在添加订单后跟新设备信息
+		public void updateEquipmentAfterAdd(String equipment_no,
+				String rent_begindate, String rent_expectdate,
+				String rent_enddate, String modify_user, String modify_time,
+				String remark, BigDecimal total_rent);
+		
+		//根据设备号查询当前设备是否有效
+		public EquipmentEntity queryIsValid(String equipment_no);
+		//根据
+		public List<EquipmentEntity> queryEquipmentByNum(String no,String counterid,String tg_id);
+}

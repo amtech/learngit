@@ -1,0 +1,112 @@
+package com.jxc.web.user.ctrl;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.fastjson.JSON;
+import com.jxc.web.user.model.OrderEntity;
+import com.jxc.web.user.service.OrderService;
+
+@Controller
+@RequestMapping("order")
+public class OrderCtl {
+	@Autowired
+	private OrderService orderService;
+
+	@RequestMapping("add")
+	public String add(){
+		return "order/order_add";
+	}
+	
+	@RequestMapping(value="add",method=RequestMethod.POST)
+	public String formAdd(OrderEntity order){
+		System.out.println("执行到order_form_add");
+		order.setId(System.currentTimeMillis()+"");
+		orderService.addOrder(order);
+		return "order/order_list";
+	}
+	
+	@RequestMapping(value="list")
+	public String list(){
+		return "order/order_list";
+	}
+	
+	@RequestMapping(value="getlist")
+	public @ResponseBody String queryOrder(Model model,String page,String rows){
+		 //当前页  
+        int intPage = Integer.parseInt((page == null || page == "0") ? "1":page);  
+        //每页显示条数  
+        int number = Integer.parseInt((rows == null || rows == "0") ? "10":rows);  
+        //每页的开始记录  第一页为1  第二页为number +1   
+        int start = (intPage-1)*number;  
+        int total = orderService.queryOrderRows();
+		List<OrderEntity> lists = new ArrayList<OrderEntity>();
+		lists = orderService.queryOrder();
+		lists = orderService.queryOrderByPage(start, number);
+		String ss = JSON.toJSONString(lists);
+		Map map = new HashMap();
+		map.put("total", total);
+		map.put("rows", lists);
+		
+		return JSON.toJSONString(map);
+	}
+	
+	//搜索页面跳转
+	@RequestMapping(value="search")
+	public String search(){
+		return "order/order_search";
+	}
+	
+	//页面传来参数：设备号，手机号，进行查询
+	@RequestMapping(value="search",method=RequestMethod.POST)
+	public String searchByNum(Model model,String equipment_no, String rent_p_tel){
+		OrderEntity oe = orderService.queryOrderByNum(equipment_no, rent_p_tel);
+		Date date = new Date();
+		SimpleDateFormat df=new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		String rent_begindate = oe.getRent_begindate();
+		String rent_expectdate = oe.getRent_expectdate();
+		if(rent_begindate != null){
+		rent_begindate = rent_begindate.substring(0,rent_begindate.length()-2);
+		rent_begindate = rent_begindate.replace("-", "/");
+		}
+		if(rent_expectdate!=null){
+			rent_expectdate = rent_expectdate.substring(0,rent_expectdate.length()-2);
+			rent_expectdate = rent_expectdate.replace("-", "/");
+		}
+		/*oe.setRent_begindate(rent_begindate);
+		oe.setRent_expectdate(rent_expectdate);*/
+		oe.setCreate_time(df.format(date));
+		if("".equals(equipment_no.trim())){
+			equipment_no = "";
+		}
+		if("".equals(rent_p_tel.trim())){
+			rent_p_tel = "";
+		}
+		String equn = equipment_no;
+		String rent = rent_p_tel;
+		model.addAttribute("rent_begindate",rent_begindate);
+		model.addAttribute("rent_expectdate",rent_expectdate);
+		model.addAttribute("equn",equn);
+		model.addAttribute("rent",rent);
+		model.addAttribute("order",oe);
+		return "order/order_search";
+	}
+		
+	/*//根据订单修改设备信息
+	@RequestMapping(value="update_equipment",method=RequestMethod.POST)
+	public String update_equipment(String equipment_no,String rent_enddate,String cost_sum,String remark){
+		orderService.updateEquipment(equipment_no, rent_enddate, cost_sum, remark);
+		return "equipment/equipment_list";
+	}*/
+}

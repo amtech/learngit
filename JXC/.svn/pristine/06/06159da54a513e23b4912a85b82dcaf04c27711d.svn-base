@@ -1,0 +1,27 @@
+package com.jxc.web.user.dao.impl;
+
+import java.util.List;
+
+import com.jxc.core.web.dao.BaseDao;
+import com.jxc.web.user.dao.EquipmentDao;
+import com.jxc.web.user.model.EquipmentEntity;
+
+public class EquipmentDaoImpl extends BaseDao implements EquipmentDao {
+
+	@Override
+	public void add(EquipmentEntity equipment) {
+		this.getSqlSession().insert("addEquipment", equipment);
+
+	}
+
+	@Override
+	public List<EquipmentEntity> getList() {
+		return this.getSqlSession().selectList("selectEquipment");
+	}
+
+	@Override
+	public void updateEquipment(String equipment_no, String rent_enddate,
+			String cost_sum, String remark) {
+		this.getSqlSession().update("updateEquipment", new Object[]{equipment_no,rent_enddate,cost_sum,remark});
+	}
+}

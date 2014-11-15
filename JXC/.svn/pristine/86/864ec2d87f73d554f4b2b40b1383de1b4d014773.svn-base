@@ -1,0 +1,39 @@
+package com.jxc.web.user.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.jxc.web.user.dao.OrderDao;
+import com.jxc.web.user.model.OrderEntity;
+
+@Service
+public class OrderService {
+	@Autowired
+	private OrderDao orderDao;
+	
+
+	public void addOrder(OrderEntity orders){
+		orderDao.addOrder(orders);
+	}
+	
+	public List<OrderEntity> queryOrder(){
+		return orderDao.queryOrder();
+	}
+	
+	public OrderEntity queryOrderByNum(String equipment_no,String rent_p_tel){
+		return orderDao.queryOrderByNum(equipment_no, rent_p_tel);
+	}
+	
+	public List<OrderEntity> queryOrderByPage(int start,int number){
+		return orderDao.queryOrderByPage(start, number);
+	}
+	/*public void updateEquipment(String equipment_no, String rent_enddate,
+			String cost_sum, String remark){
+			orderDao.updateEquipment(equipment_no, rent_enddate, cost_sum, remark);
+	}*/
+	public int queryOrderRows(){
+		return orderDao.queryOrderRows();
+	}
+}

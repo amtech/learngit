@@ -1,0 +1,327 @@
+package com.jxc.web.user.ctrl;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.druid.util.StringUtils;
+import com.alibaba.fastjson.JSON;
+import com.jxc.web.user.model.CounterEntity;
+import com.jxc.web.user.model.EquipmentEntity;
+import com.jxc.web.user.model.InfoEntity;
+import com.jxc.web.user.model.InfologEntity;
+import com.jxc.web.user.service.CounterService;
+import com.jxc.web.user.service.EquipmentService;
+import com.jxc.web.user.service.InfoService;
+import com.jxc.web.user.service.OrderService;
+
+@Controller
+@RequestMapping("info")
+public class InfoCtl {
+	@Autowired
+	private InfoService infoservice;
+	@Autowired
+	private OrderService orderService;
+	@Autowired
+	private EquipmentService equipmentService;
+	@Autowired
+	private CounterService counterService;
+	/**
+	 * 默认列表页
+	 * @return
+	 */
+	@RequestMapping(value="list")
+	public String list(Model model){
+		List<String> country = orderService.getCountryVlueAndText();
+		model.addAttribute("country",country);
+		return "info/info_list";
+	}
+	/**
+	 * 获取列表数据
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value="getlist")
+	public @ResponseBody String queryOrder(Model model,String page,String rows){
+		//当前页  
+        int intPage = Integer.parseInt((page == null || page == "0") ? "1":page);  
+        //每页显示条数  
+        int number = Integer.parseInt((rows == null || rows == "0") ? "10":rows);  
+        //每页的开始记录  第一页为1  第二页为number +1  
+        if(intPage<=0)
+        	intPage = 1;
+        int start = (intPage-1)*number;  
+        int total = infoservice.infocount();
+        Map map = new HashMap();
+        map.put("start", start);
+        map.put("number", number);
+		List<InfoEntity> lists = new ArrayList<InfoEntity>();
+		lists = infoservice.getList(map);
+		for(InfoEntity info:lists){
+			info.setCountry(orderService.getCountry(info.getCountry()));
+			if("0001".equals(info.getIs_valid())){
+				info.setIs_valid("有效");
+			}else{
+				info.setIs_valid("无效");
+			}
+			/*if(info.getDay_begin()!=null){
+				info.setDay_begin(subDate(info.getDay_begin()));
+			}
+			if(info.getDay_end()!=null){
+				info.setDay_end(subDate(info.getDay_end()));
+			}*/
+			if(info.getModify_time()!=null){
+				info.setModify_time(subDate(info.getModify_time()));
+			}
+		}
+		map.clear();
+		map.put("rows", lists);
+		map.put("total",total);
+		//String ss = JSON.toJSONString(lists);
+		return JSON.toJSONString(map);
+	}
+	
+	@RequestMapping(value="add")
+	public String add(Model model){
+		List<String> country = orderService.getCountryVlueAndText();
+		model.addAttribute("country",country);
+		return "info/info_add";
+	}
+	@RequestMapping(value="addinfo",method=RequestMethod.POST)
+	public @ResponseBody String addP(InfoEntity info){
+		infoservice.addInfo(info);
+		return "1";
+	}
+	@RequestMapping(value="detail")
+	public String gotoDetail(Model model,String id){
+		InfoEntity info = infoservice.queryInfoById(id);
+		info.setCountry(orderService.getCountry(info.getCountry()));
+		if("0001".equals(info.getIs_valid())){
+			info.setIs_valid("有效");
+		}else{
+			info.setIs_valid("无效");
+		}
+		/*if(info.getDay_begin()!=null){
+			info.setDay_begin(subDate(info.getDay_begin()));
+		}
+		if(info.getDay_end()!=null){
+			info.setDay_end(subDate(info.getDay_end()));
+		}*/
+		if(info.getModify_time()!=null){
+			info.setModify_time(subDate(info.getModify_time()));
+		}
+		model.addAttribute("info",info);
+		return "info/info_detail";
+	}
+	@RequestMapping(value="detaillist")
+	public String detaillist(Model model,String id){
+		model.addAttribute("id",id);
+		return "info/info_detaillist";
+	}
+	
+	@RequestMapping(value="getSimChildList",method=RequestMethod.POST)
+	public @ResponseBody String getSimChildList(String id,String page,String rows){
+		//当前页  
+        int intPage = Integer.parseInt((page == null || page == "0") ? "1":page);  
+        //每页显示条数  
+        int number = Integer.parseInt((rows == null || rows == "0") ? "10":rows);  
+        //每页的开始记录  第一页为1  第二页为number +1  
+        if(intPage<=0)
+        	intPage = 1;
+        int start = (intPage-1)*number;  
+        int total = infoservice.querySimChildInfoCount(id);
+		Map map = new HashMap();
+		map.put("cardid", id);
+		map.put("start", start);
+		map.put("number", number);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh-mm-ss");
+		List<InfologEntity> list = infoservice.querySimChildInfo(map);
+		//System.out.println(list);
+		//System.out.println(JSON.toJSONString(list));
+		for(InfologEntity ife:list){
+			if(ife.getOperation_time()!=null){
+				ife.setOperation_time(subDate(ife.getOperation_time()));
+			}
+		}
+		map.clear();
+		map.put("rows", list);
+		map.put("total", total);
+		//System.out.println(map);
+		return JSON.toJSONString(map);
+	}
+	
+	@RequestMapping(value="queryInfoWc",method=RequestMethod.POST)
+	public @ResponseBody String queryInfoWc(InfoEntity ie,String page,String rows){
+		//当前页  
+        int intPage = Integer.parseInt((page == null || page == "0") ? "1":page);  
+        //每页显示条数  
+        int number = Integer.parseInt((rows == null || rows == "0") ? "10":rows);  
+        //每页的开始记录  第一页为1  第二页为number +1  
+        if(intPage<=0)
+        	intPage = 1;
+        int start = (intPage-1)*number;  
+		Map map = new HashMap();
+		map.put("ie", ie);
+		map.put("start", start);
+		map.put("number", number);
+		//System.out.println("=================="+map);
+        int total = infoservice.queryInfoWithConditionCounts(map);
+		List<InfoEntity> list = infoservice.queryInfoWithCondition(map);
+		for(InfoEntity iey:list){
+			iey.setCountry(orderService.getCountry(iey.getCountry()));
+			if("0001".equals(iey.getIs_valid())){
+				iey.setIs_valid("有效");
+			}else{
+				iey.setIs_valid("无效");
+			}
+			if(iey.getModify_time()!=null){
+				iey.setModify_time(subDate(iey.getModify_time()));
+			}
+		}
+		map.clear();
+		map.put("total", total);
+		map.put("rows", list);
+		//System.out.println(map);
+		return JSON.toJSONString(map);
+	}
+	
+	@RequestMapping(value="queryUnbindEqpt")
+	public String queryUnBindPage(){
+		return "info/unbindeqpt";
+	}
+	
+	@RequestMapping(value="queryUnbindEqpt",method=RequestMethod.POST)
+	public @ResponseBody String queryUnbindEqpt(String page,String rows,Model model){
+		 List<CounterEntity> listeounter = counterService.getList();
+		 model.addAttribute("counterlist",listeounter);
+		//当前页  
+        int intPage = Integer.parseInt((page == null || page == "0") ? "1":page);  
+        //每页显示条数  
+        int number = Integer.parseInt((rows == null || rows == "0") ? "10":rows);  
+        //每页的开始记录  第一页为1  第二页为number +1  
+        if(intPage<=0)
+        	intPage = 1;
+        int start = (intPage-1)*number;  
+		Map map = new HashMap();
+		EquipmentEntity equipment = new EquipmentEntity();
+		equipment.setSim_id("0002");//#{country}equipment_state}equipment_type}scrap_date},'%').stock_date},'%')rent_enddate},'%')rent_expectdate},'%')rent_begindate},'%')counterid}is_valid
+		equipment.setNo("");equipment.setCounterid("");equipment.setEquipment_state("0001");equipment.setEquipment_type("");equipment.setScrap_date("");equipment.setStock_date("");equipment.setRent_begindate("");equipment.setRent_enddate("");equipment.setRent_expectdate("");equipment.setIs_valid("");
+		map.put("start", start);
+		map.put("number", number);
+		map.put("equipment", equipment);
+		map.put("country", "");
+		List<EquipmentEntity> list = equipmentService.queryEqptByConditions(map);
+		for(EquipmentEntity ee:list){
+			ee.setIs_valid(isValid(ee.getIs_valid()));
+			if(ee.getRent_begindate()!=null)
+			ee.setRent_begindate(subDate(ee.getRent_begindate()));
+			if(ee.getRent_enddate()!=null)
+			ee.setRent_enddate(subDate(ee.getRent_enddate()));
+			if(ee.getRent_expectdate()!=null)
+			ee.setRent_expectdate(subDate(ee.getRent_expectdate()));
+			if(ee.getScrap_date()!=null)
+			ee.setScrap_date(subDate(ee.getScrap_date()));
+			if(ee.getStock_date()!=null)
+			ee.setStock_date(subDate(ee.getStock_date()));
+			if(ee.getCreate_time()!=null)
+			ee.setCreate_time(subDate(ee.getCreate_time()));
+			if(ee.getModify_time()!=null)
+			ee.setModify_time(subDate(ee.getModify_time()));
+			ee.setCounterid(equipmentService.queryCounterName(ee.getCounterid()));
+			ee.setD_country(orderService.queryDcountry(ee.getNo()));
+			if("0001".equals(ee.getEquipment_type())){
+				ee.setEquipment_type("内部设备");
+				ee.setDeposit(equipmentService.queryDepositByEtype("内部设备"));
+			}else{
+				ee.setDeposit(equipmentService.queryDepositByEtype("外部设备"));
+				ee.setEquipment_type("外部设备");
+			}
+			if("0001".equals(ee.getEquipment_state())){
+				ee.setEquipment_state("可用");
+			}else{
+				ee.setEquipment_state("已租");
+			}
+			if(ee.getSim_id()!=null){
+				ee.setSim_id("已绑定");
+			}else{
+				ee.setSim_id("未绑定");
+			}
+			
+		} 
+		int total = equipmentService.queryEqptByConditionsNums(map);
+		map.clear();
+		map.put("total", total);
+		map.put("rows", list);
+		System.out.println(map);
+		return JSON.toJSONString(map);
+	}
+	
+	/**
+	 * 根据设备号，或者柜台号，或者国家查询
+	 * @param no 设备号
+	 * @param counterid 柜台号
+	 * @param countrys 国家
+	 * @return
+	 */
+	@RequestMapping(value="query")
+	public @ResponseBody String queryEquipmentByNum(String no,String countercode,String countrys,String page,String rows,String type,String equipment_state){
+		List<EquipmentEntity> list = new ArrayList<EquipmentEntity>();
+		//当前页  
+        int intPage = Integer.parseInt((page == null || page == "0") ? "1":page);  
+        //每页显示条数  
+        int number = Integer.parseInt((rows == null || rows == "0") ? "10":rows);  
+        //每页的开始记录  第一页为1  第二页为number +1   
+        if(intPage<=0)
+        	intPage = 1;
+        int start = (intPage-1)*number;  
+        int total = 0;
+        if(StringUtils.isEmpty(no) && StringUtils.isEmpty(countercode) && StringUtils.isEmpty(countrys) && "1".equals(type)){
+        	list = equipmentService.queryEquipmentByPage(start, number,countercode);
+        }else{
+        	Map map = new HashMap();
+        	map.put("no", no.trim());
+        	map.put("countercode", countercode);
+        	map.put("countrys", countrys);
+        	map.put("equipment_state", equipment_state);
+        	map.put("start", start);
+        	map.put("number", number);
+			list = equipmentService.queryEquipmentByNum(map);
+			total = equipmentService.queryEquipmentByNumTotal(map);
+		}
+		if(list.size()>0){
+			for(EquipmentEntity ee:list){
+				ee.setIs_valid(isValid(ee.getIs_valid()));
+				ee.setCounterid(equipmentService.queryCounterName(ee.getCounterid()));
+				ee.setD_country(orderService.queryDcountry(ee.getNo()));
+				if(ee.getEquipment_type().equals("0001"))
+					ee.setDeposit(equipmentService.queryDepositByEtype("内部设备"));
+			} 
+		}
+		Map maps = new HashMap();
+		maps.put("total", total);
+		maps.put("rows", list);
+		return JSON.toJSONString(maps);
+	}
+	
+	//判断设备是否有效0001有效，0002无效
+		public String isValid(String isValid){
+			if("0001".equals(isValid)){
+				return "有效";
+			}else{
+				return "无效";
+			}
+		}
+	//截取二期最后一个.0
+	public  static String subDate(String dates){
+		return dates.substring(0,dates.length()-2);
+	}
+}

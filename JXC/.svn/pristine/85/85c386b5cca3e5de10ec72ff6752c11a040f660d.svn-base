@@ -1,0 +1,40 @@
+package com.jxc.web.user.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.jxc.web.user.dao.EquipmentDao;
+import com.jxc.web.user.model.EquipmentEntity;
+
+@Service
+public class EquipmentService {
+	@Autowired
+	private EquipmentDao equipmentdao;
+	/**
+	 * 添加设备
+	 * @param equipment
+	 */
+	public void addEquipment(EquipmentEntity equipment){
+		equipmentdao.add(equipment);
+	}
+	/**
+	 * 获取设备数据
+	 * @return
+	 */
+	public List<EquipmentEntity> getList(){
+		return equipmentdao.getList();
+	}
+	/**
+	 * 根据设备号跟新设备归还日期，租金，备注
+	 * @param equipment_no 设备号
+	 * @param rent_enddate 归还日期
+	 * @param cost_sum 租金
+	 * @param remark 备注
+	 */
+	public void updateEquipment(String equipment_no, String rent_enddate,
+			String cost_sum, String remark){
+			equipmentdao.updateEquipment(equipment_no, rent_enddate, cost_sum, remark);
+	}
+}

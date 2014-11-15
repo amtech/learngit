@@ -1,0 +1,15 @@
+package com.jxc.web.user.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import com.jxc.web.user.model.InfoEntity;
+
+public interface InfoDao {
+	//添加方法
+	public void addInfo(InfoEntity info);
+	//查询方法
+	public List<InfoEntity> selectInfo();
+	//根据设备号查询目的地
+	public Map<String,String> queryD_country(String equipment_Sno);
+}

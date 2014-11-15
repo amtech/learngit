@@ -1,0 +1,782 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>登陆首页</title>
+	<link rel="stylesheet" type="text/css" href="../media/css/easyui.css">
+	<link rel="stylesheet" type="text/css" href="../media/css/icon.css">
+	<link rel="stylesheet" type="text/css" href="../media/css/demo.css">
+	<script type="text/javascript" src="../media/js/WdatePicker.js"></script>
+	<script type="text/javascript" src="../media/js/jquery.min.js"></script>
+	<script type="text/javascript" src="../media/js/jquery.easyui.min.js"></script>
+	<style type="text/css">
+		input{
+			border: 1px solid #95b8e7;border-radius: 5px;height: 20px;
+		}
+		td{
+			font-size: 16px;
+		}
+		
+		 .container{
+                position:relative;
+        }
+        .search{
+                background-image:url(../media/css/icons/search.png);
+                background-repeat:no-repeat;
+                height: 30px;
+			    left: 120px;
+			    position: absolute;
+			    top: 4px;
+			    width: 30px;
+			    z-index: 99;
+        }
+        table{border-collapse:collapse;border-spacing:0;}
+        td{padding:5px;margin:5px;} 
+	</style>
+	<style>
+		.lightbox{width:300px;background:#FFFFFF;border:1px solid #ccc;line-height:25px; top:20%; left:20%;}
+		.lightbox dt{background:#f4f4f4; padding:5px;}
+	</style>
+</head>
+<body class="easyui-layout" >
+	<!-- <div data-options="region:'north',border:false" style="height:60px;background:#B3DFDA;padding:10px">龙在天下</div>
+	<div data-options="region:'west',split:true,title:'菜单栏'" style="width:150px;padding:10px;">
+		<div id="orders">订单管理
+			<div style="display:none;" id="order">
+				<a href="order/add">增加订单</a>
+			</div>
+		</div>
+		<dl>
+			<dt>订单管理</dt>
+			<dd>增加订单</dd>
+		</dl>
+		
+	</div>
+	<div data-options="region:'east',split:true,collapsed:true,title:'通知'" style="width:100px;padding:10px;">通知</div>
+	<div data-options="region:'south',border:false" style="height:5px;background:#A9FACD;padding:10px;"></div>
+	<div data-options="region:'center',title:'列表'"> -->
+	<div data-options="region:'center',title:'设备订购'"  style="background-color:#F8F8FF;overflow: hidden;">
+		<!-- 表单开始 -->
+		<form id="ff" action="add" method="POST" >
+		<table cellpadding="12" align="center" width="100%" style="margin-left: 2%;margin-top: 2%;">
+		<!-- 一行四条信息 -->
+		
+		<tr>
+		<td width="10%">订单号</td>
+		<td width="17%"><input style="border: 1px solid #95b8e7;border-radius: 5px;height: 20px;background-color:#B0C4DE;" readonly="readonly" type="text" name="order_num"  value="${defaultdate}" ></input></td>
+		
+		<td width="10%">姓名<span style="color: red;">*</span></td>
+		<td width="17%"><input id="rent_p_name" style="border: 1px solid #95b8e7;border-radius: 5px;height: 20px;" type="text" name="rent_p_name" ></input></td>
+		
+		<td width="12%">手机号<span id="cellphone" style="color: red;">*</span></td>
+		<td width="17%"><!-- checkMobile(this.value) -->
+		<input  style="border: 1px solid #95b8e7;border-radius: 5px;height: 20px;" type="text" id="rent_p_tel" name="rent_p_tel" onblur="checkMobile(this)"></input>
+		<input id="tel_test" style="display:none;"  value="">
+		</td>
+		
+		
+		<!-- <td>设备号 :</td>
+		<td>
+		<input class="easyui-textbox" type="text" name="equipment_no" ></input>
+		</td> -->
+		</tr>
+		
+		<tr>
+		<td >设备号<span style="color: red;">*</span> 
+		</td>
+		<td><div class="container">
+		<input id="equipment_no" width="15%"  type="text" onblur="equipment_blur()" name="equipment_no" ></input>
+		<div id="search_img" class="search"></div></div>
+		<input id="isvalids" style="display: none;">
+		</td>
+		
+		
+		<td>租用日期<span style="color: red;">*</span></td>
+		<td>
+		<!-- <input id="txtDate" class="easyui-datetimebox" type="text" name="rent_begindate" ></input> ,onpicked:function() {$dp.$('date_diff').value=$dp.cal.date.y;} -->
+		<input id="txtDate" readonly="readonly" style="border: 1px solid #95b8e7;border-radius: 5px;" class="Wdate" type="text" name="rent_begindate" onFocus="WdatePicker({doubleCalendar:true,dateFmt:'yyyy/MM/dd HH:mm:ss',maxDate:'#F{$dp.$D(\'rent_expectdate\',{d:-4})}',onpicking:diffDate()})"/>
+		
+		</td>
+		<td>预计返还日期<span style="color: red;">*</span></td>
+		<td>
+		<!-- <input id="txtDate" class="easyui-datetimebox" type="text" name="rent_expectdate" ></input> -->
+		<input id="rent_expectdate" readonly="readonly" style="border: 1px solid #95b8e7;border-radius: 5px;" class="Wdate" type="text" name="rent_expectdate" onFocus="WdatePicker({doubleCalendar:true,dateFmt:'yyyy/MM/dd HH:mm:ss',minDate:'#F{$dp.$D(\'txtDate\',{d:+4})}',onpicking:diffDate()})"/>
+		</tr>
+
+		<tr>
+		</td>
+		<!-- 保存租用日期和返还日期的时间差 -->
+		<input id="date_diff" name="date_diff" style="display:none;" />
+		
+		<td >目的地<span style="color: red;">*</span></td>
+		<td>
+		<!-- <input id="d_country" type="text" name="d_country" ></input> -->
+		<select id="d_country" style="border: 1px solid #95b8e7;border-radius: 5px;height: 24px;width: 140px;" name="d_country" disabled="disabled" >
+			<option id="dcountryvalue" selected='selected' value=""></option>
+			<c:if test="${country!=null }">
+				<c:forEach items="${country }" var="countrys">
+					<option value="${countrys.ITEM_VALUE }">${countrys.ITEM_TEXT }</option>
+				</c:forEach>
+			</c:if>
+		</select>
+		</td>
+		
+		<td>出发地 </td>
+		<td>
+		<input class="easyui-textbox" type="text" id="s_country" name="s_country"  value="${counters.country}"></input>
+		</td>
+		
+		<td>支付方式<span style="color: red;">*</span></td>
+		<td>
+		<select id="payment" style="border: 1px solid #95b8e7;border-radius: 5px;height: 24px;width: 140px;" name="payment">
+			<c:if test="${paymentlist!=null }">
+				<c:forEach items="${paymentlist }" var="payment">
+					<option value="${payment.ITEM_VALUE }">${payment.ITEM_TEXT }</option>
+				</c:forEach>
+			</c:if>
+		</select>
+		</td>
+		</tr>
+		
+		<tr>
+		<td>租赁费用 </td>
+		<td>
+		<input id="cost_rent" onkeyup="keyups(this.value)" readonly="readonly" style="border: 1px solid #95b8e7;border-radius: 5px;height: 20px;background-color:#B0C4DE;" type="text" name="cost_rent_3g" value="0" ></input>
+		</td>
+		<input id="day_rent" name="rent_day" style="display:none;"/>
+		
+		<td>押金 </td>
+		<td>
+		<input id="deposit" name="deposit" style="border: 1px solid #95b8e7;border-radius: 5px;height: 20px;background-color:#B0C4DE;" readonly="readonly" type="text"  value="0"></input>
+		</td>
+		
+		<td>预收总金额 </td>
+		<td>
+		<input id="upfront_sum" style="border: 1px solid #95b8e7;border-radius: 5px;height: 20px;background-color:#B0C4DE;" type="text" readonly="readonly" name="upfront_sum" ></input>
+		</td>
+		</tr>	
+			
+		<tr>
+		<td width="10%">身份证号</td>
+		<td width="15%"><input class="easyui-textbox" type="text" name="rent_p_idnumber" ></input></td>
+		
+		<td width="10%">护照号</td>
+		<td width="15%"><input class="easyui-textbox" type="text" name="rent_p_passportno" ></input></td>
+		
+		<td>国籍<span style="color: red;">*</span></td>
+		<td>
+		<select id="rent_p_nationality" style="border: 1px solid #95b8e7;border-radius: 5px;height: 24px;width: 140px;" name="rent_p_nationality" >
+			<c:if test="${nationality!=null }">
+				<c:forEach items="${nationality }" var="nation">
+					<option value="${nation.ITEM_VALUE }">${nation.ITEM_TEXT }</option>
+				</c:forEach>
+			</c:if>
+		</select>
+		</td>
+		</tr>
+		
+		<tr>
+		<td>日期 </td>
+		<td>
+		<!-- <input id="txtDate" class="easyui-datetimebox" type="text" name="create_time" ></input> -->
+		<!--class="Wdate" onFocus="WdatePicker({startDate:'%y-%M-01 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss',alwaysUseStartDate:true})" -->
+		<input id="start" style="border: 1px solid #95b8e7;border-radius: 5px;background-color:#B0C4DE;" readonly="readonly" type="text" name="create_time" />
+		<!-- readonly="true"  class="Wdate" onfocus="new WdatePicker(this)" -->
+		</td>
+		
+		<td>操作员 </td>
+		<td>
+		<input style="border: 1px solid #95b8e7;border-radius: 5px;background-color:#B0C4DE;" readonly="readonly" type="text" name="create_user"  value="${realname}"></input>
+		</td>
+		</tr>
+		<tr>
+		<td >备注 </td>
+		<td colspan="7">
+		<textarea  style="border: 1px solid #95b8e7;border-radius: 5px;height: 100px;width:96%;resize:none;overflow-Y:scroll;font-size: 18px;" resize="none"  name="remark"></textarea>
+		</td>
+		</tr>
+		</table>
+		<input style="display: none;" name="equipment_type" id="equipment_type" value="0001"/>
+		</form>
+		
+		<div style="text-align:right;padding-right:10px;width:100%;">
+		<div style="width:97%"><!-- onclick="submitForm()" -->
+		<a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()" style="width: 56px;">提交</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<a href="javascript:void(0)" class="easyui-linkbutton" onclick="clearForm()" style="width: 56px;">清空</a>
+		</div>
+		</div>
+		<!-- 表单结束 -->
+	</div>
+	<!-- 遮罩层开始 -->
+		<!-- <script type="text/javascript">
+			$("#idBoxOpen").click(function (){
+				alert("tijiao");
+				var screen = $("#screen");
+				//alert(screen.id);
+				parent.$("#screen").css("display","block");
+			});
+		</script> -->
+	<!-- 遮罩层结束 -->
+	
+	<!-- 处理租用日期 返还日期 -->
+	<script type="text/javascript">
+		function diffDate(str1, str2) {
+			str1 = $("#txtDate").val();
+			//alert(str1);
+			str2 = $("#rent_expectdate").val();
+			//alert(str2);
+		    str1 = str1.replace(/-/g, "/");
+		    str2 = str2.replace(/-/g, "/");
+		    var d1;
+		    var d2;
+		    var diffday = 0;
+		    if (str1 == "") {
+		      d1 = new Date();
+		    } else {
+		      d1 = new Date(str1);
+		    }
+		    if (str2 == "") {
+		      d2 = new Date();
+		    } else {
+		      d2 = new Date(str2);
+		    }
+		    //alert(Date.parse(d1));
+		    //alert(Date.parse(d2));
+		    diffday = Date.parse(d2) - Date.parse(d1);
+		    diffday = diffday.toFixed(2) / 86400000 ;
+		   $("#date_diff").val(diffday);
+		   
+		   	var data = $("#day_rent").val();
+	    	var days = $("#date_diff").val();
+       		//alert(days);
+       		var cost_rent = days*data;
+    		//alert(cost_rent);
+    		var cost_return = $("#deposit").val();
+    		
+    		//cost_return = cost_rent.substring(0,cost_rent.indexOf(".") + 3);
+    		cost_rent = Math.round(cost_rent*100)/100;
+	       	$("#cost_rent").val(cost_rent);
+	       	var upfront_sum = parseFloat(cost_rent)+parseFloat(cost_return);
+	       	/* alert(cost_return);
+	       	alert(cost_rent);
+	       	alert(cost_rent+cost_return); */
+	       	upfront_sum = Math.round(upfront_sum*100)/100;
+	       	//alert(upfront_sum);
+	       	//alert(str2=="");
+	       	if(str1=="" || str2=="" || data==""){
+	       		$("#upfront_sum").val(cost_return);
+	       	}
+	       	$("#upfront_sum").val(upfront_sum);
+		  }
+		  //输入设备号获取设备日租金
+		   function equipment_blur(eqptno){
+			  // alert("equipment blur");
+		    	var eqptno = $("#equipment_no").val();
+		    	var testeqpt =/^[A-Za-z0-9]{11}$/;
+		    	if(testeqpt.test(eqptno)){
+		    		//alert("外部设备");
+		    		 jQuery.ajax({
+				        	/* url:"../info/queryD_country", */
+				        	url:"../equipment/isExist",
+				        	data:{equipment_no:eqptno},
+				        	type:"POST",
+				        	error:function(request){
+				        		//alert("no data");
+				        	},
+				        	success:function(data){
+				        		//alert(data);
+								if(data=="0"){
+									var obs = document.getElementById("equipment_no");
+					        		showhint(obs,"设备已存在");
+					        		$("#isvalids").val("003");
+					        		return false;
+								}else{
+					        		$("#isvalids").val("");
+					        		hidehintinfo();
+					        	}				        		
+				        	}
+				        	});
+		    		$("#equipment_type").val("0002")
+		    	}
+		    	var equipment_type = $("#equipment_type").val();
+		    	if(eqptno==""){
+		    		return false;
+		    	}
+		        /*  $.get("../equipment/dayRent?equipment_no="+eqptno,function(data){
+		        	$("#day_rent").val(data);
+		        	 var days = $("#date_diff").val();
+		        	//alert(days);
+		        	var cost_rent = days*data;
+		     		//alert(cost_rent);
+		     		var cost_return = $("#cost_return").val();
+		        	$("#cost_rent").val(cost_rent);
+		        	var upfront_sum = cost_rent+cost_return;
+		        	$("#upfront_sum").val(upfront_sum); 
+		        	count_rent();
+		        }); */
+		       	
+		       /*  $.getJSON("../equipment/dayRent",{equipment_no:eqptno},function(data){
+		        	//alert(data);
+		        	if(data==null){
+		        		var obs = document.getElementById("equipment_no");
+		        		showhint(obs,"设备号无效");
+		        		return false;
+		        	}else{
+		        		hidehintinfo();
+		        	}
+		        	//alert(data.day_rent==null);
+		        	if(data.day_rent==null){
+		        		$("#day_rent").val("0");
+		        	}
+		        	$("#day_rent").val(data.day_rent); 
+		        	//alert(data);
+		        	count_rent(); 
+		        	//alert(data.day_rent);
+		        }); */
+		        
+		      /*   $.post("../info/queryD_country",{equipment_no:eqptno},function(data){
+		        	alert(data);
+		        	alert(data.country);
+		        	alert(data.id);
+		        	if(data==null){
+		        		var obs = document.getElementById("equipment_no");
+		        		showhint(obs,"设备号无效");
+		        		return false;
+		        	}else{
+		        		hidehintinfo();
+		        	}
+		        	//alert(data.day_rent==null);
+		        	if(data.day_rent==null){
+		        		$("#day_rent").val("0");
+		        	}
+		        	$("#d_country").val(data.country);
+		        	$("#day_rent").val(data.day_rent); 
+		        	//alert(data);
+		        	count_rent(); 
+		        }); */
+		        if(!testeqpt.test(eqptno)){
+		        jQuery.ajax({
+		        	/* url:"../info/queryD_country", */
+		        	url:"../equipment/dayRent",
+		        	data:{equipment_no:eqptno,equipment_type:equipment_type},
+		        	type:"POST",
+		        	error:function(request){
+		        		alert("no data");
+		        	},
+		        	success:function(data){
+		        		data  = $.parseJSON(data);//没有这句话返回的不是对象
+		        		//alert(data[1]);
+		        		//$("#deposit").val(data[2]);
+		        		//alert(data[0].day_rent);
+		        		//alert(data[0].is_valid);
+		        		//alert(data[0].deposit);
+		        		//alert(data[1].country);
+			        	//alert(data.country);
+			        	//alert(data.id);
+			        	if(data[0]==null || data[0].is_valid != '0001'){
+			        		var obs = document.getElementById("equipment_no");
+			        		showhint(obs,"设备号无效");
+			        		$("#isvalids").val("001");
+			        		return false;
+			        	}else{
+			        		$("#isvalids").val("");
+			        		hidehintinfo();
+			        	}
+			        	//alert(data.day_rent==null);
+			        	if(data[0].day_rent==null){
+			        		$("#day_rent").val("0");
+			        	}
+			        	//$("#d_country").val(data[1]);
+			        	//alert(data[1].ITEM_VALUE);
+			        	//alert(data[0]);
+			        	//var options = "<option selected='selected' value='"+data[1].ITEM_VALUE+"'>"+data[1].ITEM_TEXT+"</option>";
+			        	//$("#d_country").append(options);
+			        	//$("#deposit").val(data[0].deposit);
+			        	$("#day_rent").val(data[0].day_rent); 
+			        	$("#deposit").val(data[2]);
+			        	//var options = "<option selected='selected' value='"+data[1].ITEM_VALUE+"'>"+data[1].ITEM_TEXT+"</option>";
+			        	document.getElementById("dcountryvalue").value=data[1].ITEM_VALUE;
+			        	document.getElementById("dcountryvalue").innerHTML=data[1].ITEM_TEXT
+				       // $("#d_country").append(options);
+			        	//alert(data);
+			        	count_rent(); 
+		        	}
+		        });}else if(testeqpt.test(eqptno)){//外部设备
+		        	jQuery.ajax({
+			        	/* url:"../info/queryD_country", */
+			        	url:"../equipment/dayRent",
+			        	data:{equipment_no:eqptno,equipment_type:equipment_type},
+			        	type:"POST",
+			        	error:function(request){
+			        		//alert("no data");
+			        	},
+			        	success:function(data){
+			        	data  = $.parseJSON(data);//没有这句话返回的不是对象
+		        		//alert(data[0]);
+		        		//alert(data[0].DESCRIPTION);
+		        		//alert(data[0].ITEM_VALUE);
+		        		$("#deposit").val(data[1]);
+		        		$("#day_rent").val(data[0].DESCRIPTION);
+		        		
+		        		//alert(data[1].DESCRIPTION);
+		        		var options = "<option selected='selected' value='"+data[0].ITEM_VALUE+"'>"+data[0].ITEM_TEXT+"</option>";
+			        	$("#d_country").append(options);
+		        	}});
+		      /* $.get("queryDcountry?equipment_no="+eqptno,function(data){
+		        	$("#d_country").val(data);
+		        }); */
+		    }
+		        };
+		    
+		    //计算租金的方法
+		    function count_rent(){
+		    	var data = $("#day_rent").val();
+		    	var days = $("#date_diff").val();
+	        	//alert(days);
+	        	var cost_rent = days*data;
+	     		//alert(cost_rent);
+	     		var cost_return = $("#deposit").val();
+	     		//alert(cost_return);
+	     		//alert(typeof(cost_return));
+	     		//cost_return = cost_rent.substring(0,cost_rent.indexOf(".") + 3);
+	     		cost_rent = Math.round(cost_rent*100)/100;
+	        	$("#cost_rent").val(cost_rent);
+	        	var upfront_sum = parseFloat(cost_rent)+parseFloat(cost_return);
+	        	/* alert(cost_return);
+	        	alert(cost_rent);
+	        	alert(cost_rent+cost_return); */
+	        	upfront_sum = Math.round(upfront_sum*100)/100;
+	        	//alert(upfront_sum);
+	        	$("#upfront_sum").val(upfront_sum);
+		    }
+		
+		//设置租用日期的初始时间为当前时间
+		$(function(){
+			$("#txtDate").val(new Date().pattern("yyyy/MM/dd HH:mm:ss"));
+		});
+	</script>
+	
+	<!-- 自定义提示框 开始 -->
+<script type="text/javascript">
+	/*
+	使用方法：
+	          直接调用showhint()方法即可，showhint()方法中参数说明：obj为要显示提示信息的控件对象，info为提示内容
+	          例：
+	          onmouseover="showhint(this,'这是地球人都知道的东西，没什么好提示的。')"
+	          onmouseout="hidehintinfo()"
+	*/
+	document.write("<span id='hintdiv' style='display:none;position:absolute;z-index:500;'></span>");
+	function showhint(obj,info)
+	{
+	    var top=obj.offsetTop;
+	    var showtype="up";
+	    var topimg="/ControlsTest/images/hint/hintuptop.gif";
+	    var bottomimg="/ControlsTest/images/hint/hintupbottom.gif";
+	    var hintimg="/ControlsTest/images/hint/ydot.png";
+	    if(top<200)
+	    {
+	        showtype="down";
+	        topimg="/ControlsTest/images/hint/hintdowntop.gif";
+	        bottomimg="/ControlsTest/images/hint/hintdownbottom.gif";
+	    }
+	    showhintinfo(obj,0,0,'提示',info,0,showtype,topimg,bottomimg,hintimg);
+	}
+	function showhintinfo(obj, objleftoffset,objtopoffset, title, info , objheight, showtype ,topimg,bottomimg,hintimg)
+	{
+	    var p = getposition(obj);
+	    if((showtype==null)||(showtype ==""))
+	    {
+	        showtype =="up";
+	    }
+	    //以下是自己修改
+	    var html=" <div style='position:absolute; visibility: visible; width:140px;z-index:501;'> <p style='margin:0; padding:0;'> </p> <div style='overflow:hidden; zoom:1;  padding:3px 10px;  text-align:left; word-break:break-all;letter-break:break-all;font: 12px/160% Tahoma, Verdana,snas-serif; color:red; background:#FFFFE1 no-repeat;margin-top:-5px;margin-bottom:-5px;'> <span id='hintinfoup'>"+info+"</span> </div> <p style='margin:0; padding:0;'>  </p> </div> <iframe id='hintiframe' style='position:absolute;z-index:100;width:276px;scrolling:none;' frameborder='0'></iframe>";
+	    //以上是自己修改
+//	    document.getElementById('hintiframe'+showtype).style.height= objheight + "px";
+//	    var frame;
+//	    frame=document.getElementById('hintiframe'+showtype).style.height;
+//	    document.getElementById('hintinfo'+showtype).innerHTML = info;
+//	    document.getElementById('hintdiv'+showtype).style.display='block';
+	    document.getElementById('hintdiv').style.display='block';
+
+	        if(objtopoffset == 0)
+	        {
+	            document.getElementById("hintdiv").innerHTML=html;
+	            if(showtype=="up")
+	            {
+	                document.getElementById('hintiframe').style.height= objheight + "px";
+	                document.getElementById('hintdiv').style.top=(p['y']-document.getElementById('hintinfo'+showtype).offsetHeight-43)+"px";
+	            }
+	            else
+	            {
+	                document.getElementById('hintiframe').style.height= objheight + "px";
+	                document.getElementById('hintdiv').style.top=p['y']+obj.offsetHeight+3+"px";
+	            }
+	        }
+	        else
+	        {
+	            document.getElementById('hintdiv').style.top=p['y']+objtopoffset+"px";
+	        }
+
+	    document.getElementById('hintdiv').style.left=p['x']+objleftoffset+"px";
+	}
+	    
+	function hidehintinfo()
+	{
+	    document.getElementById('hintdiv').style.display='none';
+//	    document.getElementById('hintdivdown').style.display='none';
+	}
+	function getposition(obj)
+	{
+	    var r = new Array();
+	    r['x'] = obj.offsetLeft;
+	    r['y'] = obj.offsetTop;
+	    while(obj = obj.offsetParent)
+	    {
+	        r['x'] += obj.offsetLeft;
+	        r['y'] += obj.offsetTop;
+	    }
+	    return r;
+	}
+	
+
+</script>
+<!-- 自定义提示框 结束-->
+	
+	<script language="javascript" type="text/javascript">  
+			   /**     
+				 * 对Date的扩展，将 Date 转化为指定格式的String     
+				 * 月(M)、日(d)、12小时(h)、24小时(H)、分(m)、秒(s)、周(E)、季度(q) 可以用 1-2 个占位符     
+				 * 年(y)可以用 1-4 个占位符，毫秒(S)只能用 1 个占位符(是 1-3 位的数字)     
+				 * eg:     
+				 * (new Date()).pattern("yyyy-MM-dd hh:mm:ss.S") ==> 2006-07-02 08:09:04.423     
+				 * (new Date()).pattern("yyyy-MM-dd E HH:mm:ss") ==> 2009-03-10 二 20:09:04     
+				 * (new Date()).pattern("yyyy-MM-dd EE hh:mm:ss") ==> 2009-03-10 周二 08:09:04     
+				 * (new Date()).pattern("yyyy-MM-dd EEE hh:mm:ss") ==> 2009-03-10 星期二 08:09:04     
+				 * (new Date()).pattern("yyyy-M-d h:m:s.S") ==> 2006-7-2 8:9:4.18     
+				 */       
+				Date.prototype.pattern=function(fmt) {        
+				    var o = {        
+				    "M+" : this.getMonth()+1, //月份        
+				    "d+" : this.getDate(), //日        
+				    "h+" : this.getHours()%12 == 0 ? 12 : this.getHours()%12, //小时        
+				    "H+" : this.getHours(), //小时        
+				    "m+" : this.getMinutes(), //分        
+				    "s+" : this.getSeconds(), //秒        
+				    "q+" : Math.floor((this.getMonth()+3)/3), //季度        
+				    "S" : this.getMilliseconds() //毫秒        
+				    };        
+				    var week = {        
+				    "0" : "\日",        
+				    "1" : "\一",        
+				    "2" : "\二",        
+				    "3" : "\三",        
+				    "4" : "\四",        
+				    "5" : "\五",        
+				    "6" : "\六"       
+				    };        
+				    if(/(y+)/.test(fmt)){        
+				        fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));        
+				    }        
+				    if(/(E+)/.test(fmt)){        
+				        fmt=fmt.replace(RegExp.$1, ((RegExp.$1.length>1) ? (RegExp.$1.length>2 ? "\星\期" : "\周") : "")+week[this.getDay()+""]);        
+				    }        
+				    for(var k in o){        
+				        if(new RegExp("("+ k +")").test(fmt)){        
+				            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));        
+				        }        
+				    }        
+				    return fmt;        
+				}      
+				    
+			/* 	$("#cost_equipment").blur(function(){
+					alert("ok");
+				}); */
+				
+				function keyups(costrent){
+					//alert("cost_rentkeydown");	
+					/* var costrent = $("#cost_rent").val(); */
+					if(!/^(-?\d+)(\.|\.\d+)?$/.test(costrent)){
+						$("#cost_rent_span").html("*请输入数字").css("color","red");
+					}else{
+						$("#cost_rent_span").empty();
+					}
+					
+					//alert("keyup");
+					var cost_rent = $("#cost_rent").val();
+					cost_rent = parseInt(cost_rent);
+					//alert("3g租赁费用"+typeof(cost_rent));
+					var cost_equipment = $("#cost_equipment").val();
+					cost_equipment = parseInt(cost_equipment);
+					//alert("设备租赁费用"+cost_equipment);
+					var cost_return = $("#cost_return").val();
+					cost_return = parseInt(cost_return);
+					//alert("押金"+cost_return);
+					var upfront_sum = cost_rent+cost_equipment+cost_return;
+					$("#upfront_sum").val(upfront_sum);
+					/* //alert(typeof(costrent));
+					if(!num.test(costrent)){
+						alert("is not a number");
+						$("#cost_rent_span").html("*请输入数字").css("color","red");
+					} */
+				}
+				
+				function keyups1(costrent){
+					//alert("cost_rentkeydown");	
+					/* var costrent = $("#cost_rent").val(); */
+					if(!/^(-?\d+)(\.|\.\d+)?$/.test(costrent)){
+						$("#costequipment").html("*请输入数字").css("color","red");
+					}else{
+						$("#costequipment").empty();
+					}
+					
+					//alert("keyup");
+					var cost_rent = $("#cost_rent").val();
+					cost_rent = parseInt(cost_rent);
+					//alert("3g租赁费用"+typeof(cost_rent));
+					var cost_equipment = $("#cost_equipment").val();
+					cost_equipment = parseInt(cost_equipment);
+					//alert("设备租赁费用"+cost_equipment);
+					var cost_return = $("#cost_return").val();
+					cost_return = parseInt(cost_return);
+					//alert("押金"+cost_return);
+					var upfront_sum = cost_rent+cost_equipment+cost_return;
+					$("#upfront_sum").val(upfront_sum);
+					/* //alert(typeof(costrent));
+					if(!num.test(costrent)){
+						alert("is not a number");
+						$("#cost_rent_span").html("*请输入数字").css("color","red");
+					} */
+				}
+				
+				/* $("#cost_equipment").keyup(function(){
+					//alert("keyup");
+					var cost_rent = $("#cost_rent").val();
+					cost_rent = parseInt(cost_rent);
+					//alert("3g租赁费用"+typeof(cost_rent));
+					var cost_equipment = $("#cost_equipment").val();
+					cost_equipment = parseInt(cost_equipment);
+					//alert("设备租赁费用"+cost_equipment);
+					var cost_return = $("#cost_return").val();
+					cost_return = parseInt(cost_return);
+					//alert("押金"+cost_return);
+					var upfront_sum = cost_rent+cost_equipment+cost_return;
+					$("#upfront_sum").val(upfront_sum);
+				}); */
+				//var date = new Date();     
+				//window.alert(date.pattern("yyyy-MM-dd hh:mm:ss"));  
+				// 
+</script>    
+
+<script>
+	//验证手机号1开头11位
+	 function checkMobile(obj) {
+		//alert(str);
+		//alert("haha");
+		var str =obj.value;
+	    var re = /^1\d{10}$/;
+	    if (!re.test(str)) {
+	    	//alert("wrong");
+	       showhint(obj,"手机号格式有误!");
+	       $("#tel_test").val("1");
+	       return false;
+	    }else{
+	       //$("#cellphone1").html("");
+	       hidehintinfo();
+	       $("#tel_test").val("");
+	       //return true;
+	    }
+	}
+		
+	function submitForm(){
+		//alert("submit");
+		//checkMobile();
+		if($("#rent_p_name").val()==""){
+			var ob = document.getElementById("rent_p_name");
+			showhint(ob,"姓名不能为空!");
+			return false;
+		}else if($("#rent_p_tel").val()==""){
+			var ob = document.getElementById("rent_p_tel");
+			showhint(ob,"手机号不能为空!");
+		}else if($("#tel_test").val()=="1"){
+			 var obs = document.getElementById("rent_p_tel");
+		     showhint(obs,"手机号格式有误!");
+		     return false;
+		}else if($("#equipment_no").val()==""){
+			var ob = document.getElementById("equipment_no");
+			showhint(ob,"设备号不能为空!");
+			return false;
+		}else if($("#txtDate").val()==""){
+			var ob = document.getElementById("txtDate");
+			showhint(ob,'租用日期不能为空!');
+			return false;
+		}else if($("#rent_expectdate").val()==""){
+			var ob = document.getElementById("rent_expectdate");
+			showhint(ob,"截止日期不能为空!");
+			return false;
+		}else if($("#isvalids").val()=="001"){
+			var ob = document.getElementById("equipment_no");
+			showhint(ob,"设备号无效!");
+			return false;
+		}else if($("#isvalids").val()=="003"){
+			var ob = document.getElementById("equipment_no");
+			showhint(ob,"设备已存在!");
+			return false;
+		}else{
+			hidehintinfo();
+		} 
+		
+		if($("#rent_p_name").val()!="" && $("#equipment_no").val()!="" && $("#rent_p_tel").val()!="" && $("#txtDate").val()!="" && $("#rent_expectdate").val()!=""){
+			//parent.$("#screen").css("display","block");
+			var a = setTimeout($('#ff').submit(),500);
+		}
+		
+	}
+	function clearForm(){
+	/* $('#ff').form('clear'); */
+		parent.frames["countents"].src = "order/add";
+		
+	}
+	$(function(){
+		$("#start").val(new Date().pattern("yyyy/MM/dd HH:mm:ss"));
+		
+		document.onkeydown=function(event){
+            var e = event || window.event || arguments.callee.caller.arguments[0];
+            if(e && e.keyCode==27){ // 按 Esc 
+                //要做的事情
+              }
+            if(e && e.keyCode==113){ // 按 F2 
+                 //要做的事情
+               }            
+             if(e && e.keyCode==13){ // enter 键
+            	 submitForm();
+            }
+        }; 
+		
+	});
+	/*  $(function () {
+            $("#txtDate").datetimebox({
+                formatter: function (date) {
+                    var y = date.getYear();
+                    var m = date.getMonth() + 1;
+                    var d = date.getDate();
+                    var h = date.getHours();
+                    var M = date.getMinutes();
+                    var s = date.getSeconds();
+                    return y + "/" + (m < 10 ? ("0" + m) : m) + "/" + (d < 10 ? ("0" + d) : d)+" "+(h < 10 ? ("0" + h) : h)+":"+(M < 10 ? ("0" + M) : M)+":"+(s < 10 ? ("0" + s) : s) ;
+                }
+            });
+        }); */
+        
+</script>
+<script type="text/javascript">
+	$(function(){
+		$("#search_img").click(function(){
+			window.open("../equipment/list", "设备列表",'height=600,width=1000,top=100,left=300,toolbar=no,menubar=no,scrollbars=no,resizable=no,location=no,status=no')
+		});
+	});
+</script>
+</body>
+</html>

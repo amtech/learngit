@@ -1,0 +1,52 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>登陆首页</title>
+	<link rel="stylesheet" type="text/css" href="http://localhost:8080/JXC/media/css/easyui.css">
+	<link rel="stylesheet" type="text/css" href="http://localhost:8080/JXC/media/css/icon.css">
+	<link rel="stylesheet" type="text/css" href="http://localhost:8080/JXC/media/css/demo.css">
+	<script type="text/javascript" src="http://localhost:8080/JXC/media/js/jquery.min.js"></script>
+	<script type="text/javascript" src="http://localhost:8080/JXC/media/js/jquery.easyui.min.js"></script>
+</head>
+<body class="easyui-layout">
+		<dl>
+			<dt>订单管理</dt>
+			<dd><a href="#" onclick="list();">订单列表</a></h3></dd>
+		</dl>
+		<dl>
+			<dt>人员管理</dt>
+			<dd><a href="user/list">人员列表</a></dd>
+		</dl>
+		<dl>
+			<dt>柜台管理</dt><!-- href="counter/counter.jhtml" -->
+			<dd><a href="#" id="counterlist">柜台列表</a></dd>
+		</dl>
+		<dl>
+			<dt>设备管理</dt>
+			<dd><a href="../equipment/list">设备管理列表</a></dd>
+		</dl>
+		<dl>
+			<dt>国际漫游卡</dt>
+			<dd><a href="../info/list">国际漫游卡列表</a></dd>
+		</dl>
+		
+	<script type="text/javascript">
+		$("#counterlist").click(function f1(){
+			alert("function f1()");
+			//alert(parent.frames["countents"].location);
+			parent.frames["countents"].src = "../counter/counter.jhtml";
+			//alert(parent.frames(2));
+			//window.parent.frames["countents"].location.reload(true);
+			//parent.document.all("countents").location.reload();
+		}); 
+		function list(){
+			parent.frames["countents"].src = "../order/list";
+		}
+	</script>
+</body>
+ 
+</html>

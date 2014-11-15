@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 
+	"-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jxc.web.user.dao.InfoDao">
+	<resultMap type="com.jxc.web.user.model.InfoEntity" id="R_Info_ENTITY" />
+	<resultMap type="com.jxc.web.user.model.InfologEntity" id="R_Infolog_ENTITY"></resultMap>
+	<resultMap type="String" id="str" />
+	<resultMap type="Integer" id="ints"></resultMap>
+	<resultMap type="java.util.HashMap" id="hashmap"></resultMap>
+	<resultMap type="java.util.List" id="list"></resultMap>
+	<!-- 插入数据 -->
+	<select id="addInfo" resultMap="R_Info_ENTITY"
+		parameterType="map">
+		INSERT INTO `sky`.`t_3g_info` (`ID`, `OPERATORS`, `COUNTRY`,`DAY_RENT`,`DAY_BEGIN`,`DAY_END`,`IS_VALID`, `CREATE_USER`, `CREATE_TIME`, `MODIFY_USER`, `MODIFY_TIME`, `REMARK`) VALUES (#{id}, #{operators}, #{country},#{day_rent},#{day_begin},#{day_end}, '0001', #{create_user}, #{create_time}, #{create_user},#{create_time}, #{remark});
+	</select>
+	<!-- 查询所有记录 -->
+	<select id="selectInfo" resultMap="R_Info_ENTITY" parameterType="map">
+		SELECT * FROM `sky`.`t_3g_info` LIMIT #{start},#{number};
+	</select>
+	<!-- 查询总记录条数 -->
+	<select id="infocount" resultMap="ints">
+		SELECT count(*) FROM t_3g_info;
+	</select>
+	<!-- 根据设备号查询目的地 ti.IS_VALID,ti.DAY_RENT,ti.ID-->
+	<select id="queryD_country" resultMap="hashmap" parameterType="map">
+		<!-- SELECT ti.COUNTRY FROM t_3g_info ti LEFT JOIN t_3g_equipment te ON ti.ID = te.3G_ID AND te.`NO` = #{equipment_Sno}; -->
+		<!-- SELECT COUNTRY FROM t_3g_info WHERE ID = (SELECT SIM_ID FROM t_3g_equipment WHERE NO = #{equipment_Sno}); -->
+		SELECT tl.ITEM_TEXT,tl.ITEM_VALUE,tl.DESCRIPTION FROM t_info_code_line tl LEFT JOIN t_info_code tc ON tl.CODEID = tc.ID WHERE tc.CODE = 'country' AND tl.`STATUS`='1' AND tl.ITEM_VALUE = (SELECT COUNTRY FROM t_3g_info  WHERE ID = (SELECT SIM_ID FROM t_3g_equipment WHERE NO = #{equipment_Sno}));
+	</select>
+	<!-- 根据sim  id查询sim卡信息 -->
+	<select id="queryInfoById" resultMap="R_Info_ENTITY" parameterType="map">
+		SELECT * FROM t_3g_info WHERE ID = #{id};
+	</select>
+	<!-- 对SIM卡操作后更新其子表 -->
+	<insert id="recordSimInfo" parameterType="map">
+		<!-- INSERT INTO t_3g_info_log VALUES (replace(uuid(),'-',''),'95155e63528b11e4a562d89d672b5e6c','新增','admin',now(),'hahaha'); -->
+		 INSERT INTO t_3g_info_log VALUES (replace(uuid(),'-',''),#{sim_id},#{operation_content},#{operation_user},#{operation_time},#{remark}); 
+	</insert>
+	<!-- 根据SIM卡ID查询其子表 -->
+	<select id="querySimChildInfo" resultMap="R_Infolog_ENTITY" parameterType="map">
+		SELECT * FROM t_3g_info_log WHERE CARD_ID = #{cardid} ORDER BY OPERATION_TIME DESC LIMIT #{start},#{number};
+	</select>
+	<!-- 查询到子表记录的总条数 -->
+	<select id="querySimChildInfoCount" resultMap="ints">
+		SELECT count(*)  FROM t_3g_info_log WHERE CARD_ID = #{cardid} ;
+	</select>
+</mapper>

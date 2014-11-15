@@ -1,0 +1,82 @@
+package com.jxc.web.user.ctrl;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.druid.support.json.JSONUtils;
+import com.alibaba.fastjson.JSON;
+import com.jxc.core.util.JSONHelper;
+import com.jxc.web.user.model.EquipmentEntity;
+import com.jxc.web.user.model.InfoEntity;
+import com.jxc.web.user.service.EquipmentService;
+import com.jxc.web.user.service.InfoService;
+
+@Controller
+@RequestMapping("equipment")
+public class EquipmentCtl {
+	@Autowired
+	private EquipmentService equipmentservice;
+	@Autowired
+	private InfoService infoservice;
+	/**
+	 * 默认列表页
+	 * @return
+	 */
+	@RequestMapping(value="list")
+	public String list(){
+		return "equipment/equipment_list";
+	}
+	/**
+	 * 获取列表数据
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value="getlist")
+	public @ResponseBody String queryOrder(Model model){
+		List<EquipmentEntity> lists = new ArrayList<EquipmentEntity>();
+		lists = equipmentservice.getList();
+		String ss = JSON.toJSONString(lists);
+		return ss;
+	}
+		
+	/**
+	 * 根据订单修改设备信息
+	 * @param equipment_no 设备号
+	 * @param rent_enddate 退还时间
+	 * @param cost_sum 设备租金
+	 * @param remark 备注
+	 * @return
+	 */
+	/*@RequestMapping(value="update_equipment",method=RequestMethod.POST)
+	public String update_equipment(String equipment_no,String rent_enddate,BigDecimal cost_sum,String remark){
+		equipmentservice.updateEquipment(equipment_no, rent_enddate, cost_sum, remark);
+		return "equipment/equipment_list";
+	}*/
+	
+	@RequestMapping(value="dayRent")
+	public @ResponseBody String queryDayRent(String equipment_no){
+		EquipmentEntity bd = equipmentservice.queryDayRent(equipment_no);
+		InfoEntity ie = infoservice.queryD_country(equipment_no);
+		List list = new ArrayList();
+		list.add(bd);
+		list.add(ie);
+		System.out.println(bd);
+//		String ee  =  JSONUtils.toJSONString(bd);
+		//String jsons = "{'id':'"+bd.getId()+"','day_rent':'"+bd.getDay_rent()+"'}";
+		//System.out.println(bd);
+		//System.out.println(JSONUtils.toJSONString(bd));
+		//System.out.println(JSONUtils.toJSONString(bd));
+		//String jsons = JSON.toJSONString(bd);
+		String jsons = JSON.toJSONString(list);
+		return jsons;
+	}
+	
+}

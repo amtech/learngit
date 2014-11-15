@@ -1,0 +1,28 @@
+package com.jxc.web.user.dao.impl;
+
+import java.util.List;
+import java.util.Map;
+
+import com.jxc.core.web.dao.BaseDao;
+import com.jxc.web.user.dao.InfoDao;
+import com.jxc.web.user.model.InfoEntity;
+
+public class InfoDaoImpl extends BaseDao implements InfoDao {
+
+	@Override
+	public void addInfo(InfoEntity info) {
+		this.getSqlSession().insert("addInfo",info);
+	}
+
+	@Override
+	public List<InfoEntity> selectInfo() {
+		return this.getSqlSession().selectList("selectInfo");
+	}
+
+	@Override
+	public Map<String,String> queryD_country(String equipment_Sno) {
+		
+		return this.getSqlSession().selectOne("queryD_country",equipment_Sno);
+	}
+
+}

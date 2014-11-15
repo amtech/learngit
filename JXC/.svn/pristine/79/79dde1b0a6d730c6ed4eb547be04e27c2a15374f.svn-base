@@ -1,0 +1,20 @@
+package com.jxc.web.user.dao;
+
+import java.util.List;
+
+import com.jxc.web.user.model.OrderEntity;
+
+public interface OrderDao {
+		//添加订单
+		public void addOrder(OrderEntity order);
+		//查询所有订单
+		public List<OrderEntity> queryOrder();
+		//根据设备号或者手机号查询3g订购卡
+		public OrderEntity queryOrderByNum(String equipment_no,String rent_p_tel);
+		/*//根据订单中的设备号修改设备信息：设备返还日期，设备租金，备注
+		public abstract void updateEquipment(String equipment_no,String rent_enddate,String cost_sum,String remark);*/
+		//根据当前页和每页的条数查询order
+		public List<OrderEntity> queryOrderByPage(int start,int number);
+		//查询总共条数的方法
+		public int queryOrderRows();
+}

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 
+	"-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jxc.web.user.dao.EquipmentDao">
+	<resultMap type="com.jxc.web.user.model.EquipmentEntity" id="R_Equipment_ENTITY" />
+	<resultMap type="java.math.BigDecimal" id="decimal"/>
+	<!-- 插入数据 -->
+	<select id="add" resultMap="R_Equipment_ENTITY"
+		parameterType="map">
+		INSERT INTO `sky`.`t_3g_equipment` (`ID`, `NO`, `3G_ID`, `COUNTERID`, `RENT_BEGINDATE`, `RENT_EXPECTDATE`, `RENT_ENDDATE`, `STOCK_DATE`, `SCRAP_DATE`, `IS_VALID`, `SORT`, `CREATE_USER`, `CREATE_TIME`, `MODIFY_USER`, `MODIFY_TIME`) VALUES ('1', '12', '123', '21', '2014-09-17 06:57:28', '2014-09-17 06:57:29', '2014-09-17 06:57:30', '2014-09-17 06:57:31', '2014-09-17 06:57:33', '0001', 1, 'asd', '2014-09-17 06:57:41', 'dsss', '2014-09-17 06:57:48');
+	</select>
+	<select id="getList" resultMap="R_Equipment_ENTITY" parameterType="map">
+		SELECT * FROM `sky`.`t_3g_equipment`;
+	</select>
+	<!-- 更新订单后，根据订单中的设备号修改设备信息：设备实际返还日期，设备租金，备注 -->
+	<select id="updateEquipment" resultMap="R_Equipment_ENTITY" parameterType="map">
+		UPDATE `sky`.`t_3g_equipment` SET `TOTAL_RENT`=#{2},`REMARK`=#{3}, `RENT_ENDDATE`=#{1},`RENT_EXPECTDATE`=null WHERE  `NO`=#{0};
+	</select>
+	<!-- 提交订单后，根据订单中的设备号修改设备信息：设备租用日期，预计返还日期，实际返还日期，修改人，修改时间，设备租金，备注 -->
+	<update id="updateEquipmentAfterAdd"  parameterType="map">
+		UPDATE `sky`.`t_3g_equipment` SET `RENT_BEGINDATE`=#{1}, `RENT_EXPECTDATE`=#{2}, `RENT_ENDDATE`=#{3}, `MODIFY_USER`=#{4}, `MODIFY_TIME`=#{5}, `REMARK`=#{6}, `TOTAL_RENT`=#{7},`RENT_ENDDATE`='9999-12-12 00:00:00' WHERE  `NO`=#{0};
+	</update>
+	<!-- 根据设备号查询此设备的日租金 -->
+	<select id="queryDayRent" resultMap="R_Equipment_ENTITY" parameterType="map">
+		SELECT IS_VALID,DAY_RENT,ID,DEPOSIT FROM t_3g_equipment WHERE NO = #{eqptno} AND IS_VALID = "0001" AND  (<![CDATA[ RENT_ENDDATE < now() ]]> OR RENT_ENDDATE IS NULL) ;
+	</select>
+	<!-- 根据设备号查询此设备是否有效 -->
+	<select id="queryIsValid" resultMap="R_Equipment_ENTITY" parameterType="map">
+		SELECT IS_VALID,DEPOSIT FROM t_3g_equipment WHERE NO = #{equipment_no};
+	</select>
+	<!-- 根据柜台号或者设备号，国家查询设备  -->
+	<select id="queryEquipmentByNum" resultMap="R_Equipment_ENTITY" parameterType="map">
+	  SELECT * FROM t_3g_equipment WHERE IS_VALID = "0001" NO = #{0} OR COUNTERID = #{1} OR 3G_ID = (SELECT ID FROM t_3g_info WHERE COUNTRY = #{2});
+	</select>
+</mapper>

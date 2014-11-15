@@ -1,0 +1,13 @@
+package com.jxc.web.user.dao;
+
+import java.util.List;
+
+import com.jxc.web.user.model.InfoEntity;
+
+public interface InfoDao {
+	//添加方法
+	public void addInfo(InfoEntity info);
+	//查询方法
+	public List<InfoEntity> selectInfo();
+	public String queryD_country(String equipment_Sno);
+}

@@ -1,0 +1,26 @@
+package com.jxc.web.user.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import com.jxc.web.user.model.InfoEntity;
+import com.jxc.web.user.model.InfologEntity;
+
+public interface InfoDao {
+	//添加方法
+	public void addInfo(InfoEntity info);
+	//查询总记录
+	public List<InfoEntity> selectInfo(Map map);
+	//查询总条数
+	public int infocount();
+	//根据设备号查询目的地
+	public Map<String,String> queryD_country(String equipment_Sno);
+	//根据SIMID查询
+	public InfoEntity queryInfoById(String id);
+	//对SIM卡操作后向其子表插入数据
+	public void recordSimInfo(Map map);
+	//根据sim卡号查询其操作记录
+	public List<InfologEntity> querySimChildInfo(Map map);
+	//根据SIM卡号查询到操作记录的总条数
+	public int querySimChildInfoCount(String cardid);
+}

@@ -1,0 +1,32 @@
+package com.jxc.web.user.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.jxc.web.user.dao.InfoDao;
+import com.jxc.web.user.model.InfoEntity;
+
+@Service
+public class InfoService {
+	@Autowired
+	private InfoDao infodao;
+	/**
+	 * 添加方法
+	 * @param info
+	 */
+	public void addInfo(InfoEntity info){
+		infodao.addInfo(info);
+	}
+	/**
+	 * 获取列表方法
+	 * @return
+	 */
+	public List<InfoEntity> getList(){
+		return infodao.selectInfo();
+	}
+	public String queryD_country(String equipment_no) {
+		return infodao.queryD_country(equipment_no);
+	}
+}

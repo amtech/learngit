@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 
+	"-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jxc.web.user.dao.EquipmentDao">
+	<resultMap type="com.jxc.web.user.model.EquipmentEntity" id="R_Equipment_ENTITY" />
+	<resultMap type="Integer" id="ints" />
+	<resultMap type="java.lang.String" id="str"></resultMap>
+	<resultMap type="java.math.BigDecimal" id="decimal"/>
+	<!-- 查询所有设备 -->
+	<select id="getAll" resultMap="R_Equipment_ENTITY" parameterType="map">
+		SELECT * FROM t_3g_equipment;
+	</select>
+	<!-- 查询可用设备 -->
+	<select id="getList" resultMap="R_Equipment_ENTITY" parameterType="map">
+		SELECT * FROM `sky`.`t_3g_equipment` WHERE IS_VALID = "0001" AND  (<![CDATA[ RENT_ENDDATE < now() ]]> OR RENT_ENDDATE IS NULL) AND <![CDATA[ SCRAP_DATE > now() ]]>  LIMIT #{0},#{1};
+	</select>
+	<!-- 更新订单后，根据订单中的设备号修改设备信息：设备实际返还日期，设备租金-->
+	<select id="updateEquipment" resultMap="R_Equipment_ENTITY" parameterType="map">
+		UPDATE `sky`.`t_3g_equipment` SET `TOTAL_RENT`=#{2},`REMARK`=#{3}, `RENT_ENDDATE`=#{1},`RENT_EXPECTDATE`=null,EQUIPMENT_STATE='0001' WHERE  `NO`=#{0};
+	</select>
+	<!-- 提交订单后，根据订单中的设备号修改设备信息：设备租用日期，预计返还日期，实际返还日期，修改人，修改时间，设备租金，备注 -->
+	<update id="updateEquipmentAfterAdd"  parameterType="map">
+		UPDATE `sky`.`t_3g_equipment` SET `RENT_BEGINDATE`=#{1}, `RENT_EXPECTDATE`=#{2}, `RENT_ENDDATE`=#{3}, `MODIFY_USER`=#{4}, `MODIFY_TIME`=#{5},  `TOTAL_RENT`=#{7},`RENT_ENDDATE`='9999-12-12 00:00:00',EQUIPMENT_STATE='0002' WHERE  `NO`=#{0};
+	</update>
+	<!-- 根据设备号查询此设备的日租金 -->
+	<select id="queryDayRent" resultMap="R_Equipment_ENTITY" parameterType="map">
+		SELECT IS_VALID,DAY_RENT,ID,DEPOSIT FROM t_3g_equipment WHERE NO = #{eqptno} AND IS_VALID = "0001" AND  (<![CDATA[ RENT_ENDDATE < now() ]]> OR RENT_ENDDATE IS NULL) ;
+	</select>
+	<!-- 根据设备号查询此设备是否有效 -->
+	<select id="queryIsValid" resultMap="R_Equipment_ENTITY" parameterType="map">
+		SELECT IS_VALID,DEPOSIT FROM t_3g_equipment WHERE NO = #{equipment_no};
+	</select>
+	<!-- 根据柜台号或者设备号，国家查询设备  -->
+	<select id="queryEquipmentByNum" resultMap="R_Equipment_ENTITY" parameterType="map">
+	  SELECT * FROM t_3g_equipment WHERE IS_VALID = "0001" AND(NO = #{0} OR COUNTERID = #{1} OR SIM_ID = (SELECT ID FROM t_3g_info WHERE COUNTRY = #{2}));
+	</select>
+	<!-- 查询共有多少条记录 -->
+	<select id="queryEquipmentRows" resultMap="ints" parameterType="map">
+		SELECT COUNT(*) FROM t_3g_equipment ;
+	</select>
+	<!-- 分页查询 -->
+	<select id="queryEquipmentByPage" resultMap="R_Equipment_ENTITY" parameterType="map">
+		SELECT * FROM t_3g_equipment ORDER BY MODIFY_TIME DESC LIMIT #{0},#{1} ;
+	</select>
+	<!-- 查询有效总记录数 -->
+	<select id="queryEquipmentInvalidRows" resultMap="ints" parameterType="map">
+		SELECT COUNT(*) FROM t_3g_equipment WHERE IS_VALID = "0001" AND  (<![CDATA[ RENT_ENDDATE < now() ]]> OR RENT_ENDDATE IS NULL) AND <![CDATA[ SCRAP_DATE > now() ]]>;
+	</select>
+	<!-- 添加设备 -->
+	<insert id="addequipment" parameterType="map">
+		INSERT INTO `sky`.`t_3g_equipment` (`ID`, `NO`, `SIM_ID`, `COUNTERID`, `STOCK_DATE`, `SCRAP_DATE`, `IS_VALID`, `CREATE_USER`, `CREATE_TIME`, `REMARK`) VALUES ('8', 'f1830293', '19', '5', '2014-10-09 14:52:32', '2024-10-09 14:52:33', '0001', 'admin', '2014-10-09 14:52:57', '可用设备');
+	</insert>
+	<!-- 根据柜台号查询柜台名称 -->
+	<select id="queryCounterName" resultMap="str" parameterType="map">
+		SELECT NAME FROM t_3g_counter WHERE ID = #{no};
+	</select>
+</mapper>

@@ -1,0 +1,52 @@
+apply plugin: "war"
+
+group = "com.jxc"
+version = "1.0"
+description = """jxc"""
+//java版本
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+//编码设置
+[ compileJava, compileTestJava ]*.options*.encoding = 'UTF-8'
+//仓库
+repositories {
+      mavenCentral()
+}
+//依赖
+dependencies {
+    /**spring版本号**/
+    def springVersion = "+"
+    compile("org.springframework:spring-context:${springVersion}") {
+        exclude(module: "commons-logging")
+    }
+    compile  "org.springframework:spring-webmvc:${springVersion}",
+              "org.springframework:spring-jdbc:${springVersion}",
+              "org.springframework:spring-tx:${springVersion}",
+              "com.alibaba:druid:+",
+              "com.alibaba:fastjson:+",
+              "org.aspectj:aspectjrt:1.6.10",
+              "org.slf4j:slf4j-api:1.6.6",
+              "javax.inject:javax.inject:1",
+              "jstl:jstl:1.2",
+              "dom4j:dom4j:1.6.1",
+              "org.mybatis:mybatis:+",
+              "commons-lang:commons-lang:2.6",
+              "org.mybatis:mybatis-spring:+",
+              "org.slf4j:jcl-over-slf4j:1.6.6",
+              "org.slf4j:slf4j-log4j12:1.6.6",
+              "mysql:mysql-connector-java:+"
+    compile( "log4j:log4j:1.2.17") {
+        exclude(module: "mail")
+        exclude(module: "jms")
+        exclude(module: "jmxtools")
+        exclude(module: "jmxri")
+    }
+    testCompile  "junit:junit:4.7"
+    providedCompile  "javax.servlet:servlet-api:2.5"
+    providedCompile  "javax.servlet.jsp:jsp-api:2.1"
+    
+  //加载本地依赖
+  //  compile fileTree(dir: 'src/main/webapp/WEB-INF/lib', include: '*.jar')
+}
+
+

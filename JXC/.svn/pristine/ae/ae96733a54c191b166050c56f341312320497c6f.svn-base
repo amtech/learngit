@@ -1,0 +1,62 @@
+package com.jxc.web.user.dao.impl;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
+
+import com.jxc.core.web.dao.BaseDao;
+import com.jxc.web.user.dao.OrderDao;
+import com.jxc.web.user.model.OrderEntity;
+
+@Repository
+public class OrderDaoImpl extends BaseDao implements OrderDao {
+	
+	@Override
+	public void addOrder(OrderEntity order) {
+		// TODO Auto-generated method stub
+		this.getSqlSession().insert("addOrder",order);
+	}
+
+	@Override
+	public List<OrderEntity> queryOrder() {
+		
+		return this.getSqlSession().selectList("queryOrder");
+	}
+
+	//@Param("equipment_no")String equipment_no, @Param("rent_p_tel")String rent_p_tel
+	//String equipment_no,String rent_p_tel
+	@Override
+	public OrderEntity queryOrderByNum(String equipment_no, String rent_p_tel) {
+		/*if("".equals(equipment_no.trim()))
+			return this.getSqlSession().selectOne("queryOrderByNum",new Object[]{equipment_no,rent_p_tel});
+		if("".trim().equals(rent_p_tel.trim()))
+			return this.getSqlSession().selectOne("queryOrderByNum",equipment_no);*/
+		/*OrderEntity oe = new OrderEntity();
+		oe.setEquipment_no(equipment_no);
+		oe.setRent_p_tel(rent_p_tel);
+		return this.getSqlSession().selectOne("queryOrderByNum",oe);*/
+		/*Map<Object,String> map = new HashMap<Object,String>();
+		map.put("equipment_no", equipment_no);
+		map.put("rent_p_tel", rent_p_tel);
+		return this.getSqlSession().selectOne("queryOrderByNum",map);*/
+		return this.getSqlSession().selectOne("queryOrderByNum", new Object[]{equipment_no,rent_p_tel});
+	}
+
+	@Override
+	public List<OrderEntity> queryOrderByPage(int start, int number) {
+		return this.getSqlSession().selectList("queryOrderByPage", new Object[]{start,number});
+	}
+
+	@Override
+	public int queryOrderRows() {
+		return this.getSqlSession().selectOne("queryOrderRows");
+	}
+
+	/*@Override
+	public void updateEquipment(String equipment_no, String rent_enddate,
+			String cost_sum, String remark) {
+		this.getSqlSession().update("updateEquipment", new Object[]{equipment_no,rent_enddate,cost_sum,remark});
+	}*/
+
+}

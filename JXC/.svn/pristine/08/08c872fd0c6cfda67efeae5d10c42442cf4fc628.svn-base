@@ -1,0 +1,273 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>登陆首页</title>
+	<link rel="stylesheet" type="text/css" href="../media/css/easyui.css">
+	<link rel="stylesheet" type="text/css" href="../media/css/icon.css">
+	<link rel="stylesheet" type="text/css" href="../media/css/demo.css">
+	<script type="text/javascript" src="../media/js/WdatePicker.js"></script>
+	<script type="text/javascript" src="../media/js/calendar.js"></script>
+	<script type="text/javascript" src="../media/js/jquery.min.js"></script>
+	<script type="text/javascript" src="../media/js/jquery.easyui.min.js"></script>
+</head>
+<body class="easyui-layout"  style="background-color:#F8F8FF">
+	<!-- <div data-options="region:'north',border:false" style="height:60px;background:#B3DFDA;padding:10px">龙在天下</div>
+	<div data-options="region:'west',split:true,title:'菜单栏'" style="width:150px;padding:10px;">
+		<div id="orders">订单管理
+			<div style="display:none;" id="order">
+				<a href="order/add">增加订单</a>
+			</div>
+		</div>
+		<dl>
+			<dt>订单管理</dt>
+			<dd>增加订单</dd>
+		</dl>
+		
+	</div>
+	<div data-options="region:'east',split:true,collapsed:true,title:'通知'" style="width:100px;padding:10px;">通知</div>
+	<div data-options="region:'south',border:false" style="height:5px;background:#A9FACD;padding:10px;"></div>
+	<div data-options="region:'center',title:'列表'"> -->
+		<!-- 表单开始 -->
+		<form id="ff" action="add" method="POST" style="margin-left: 200px;">
+		<table cellpadding="5">
+		<!-- 一行四条信息 -->
+		
+		<tr>
+		<td>订单号:</td>
+		<td><input class="easyui-textbox" type="text" name="order_num" ></input></td>
+		
+		<td>姓名:</td>
+		<td><input class="easyui-textbox" type="text" name="rent_p_name" ></input></td>
+		
+		<td>身份证号:</td>
+		<td><input class="easyui-textbox" type="text" name="rent_p_idnumber" ></input></td>
+		
+		<td>护照号:</td>
+		<td><input class="easyui-textbox" type="text" name="rent_p_passportno" ></input></td>
+		</tr>
+		
+		<tr>
+		<td>国籍 :</td>
+		<td>
+		<select class="easyui-combobox" style="width:140px;" name="rent_p_nationality"><option value="ar">Arabic</option><option value="bg">Bulgarian</option><option value="ca">Catalan</option><option value="zh" selected="selected">Chinese</option><option value="cs">Czech</option><option value="da">Danish</option><option value="nl">Dutch</option><option value="en" >English</option><option value="et">Estonian</option><option value="fi">Finnish</option><option value="fr">French</option><option value="de">German</option><option value="el">Greek</option><option value="ht">Haitian Creole</option><option value="he">Hebrew</option><option value="hi">Hindi</option><option value="mww">Hmong Daw</option><option value="hu">Hungarian</option><option value="id">Indonesian</option><option value="it">Italian</option><option value="ja">Japanese</option><option value="ko">Korean</option><option value="lv">Latvian</option><option value="lt">Lithuanian</option><option value="no">Norwegian</option><option value="fa">Persian</option><option value="pl">Polish</option><option value="pt">Portuguese</option><option value="ro">Romanian</option><option value="ru">Russian</option><option value="sk">Slovak</option><option value="sl">Slovenian</option><option value="es">Spanish</option><option value="sv">Swedish</option><option value="th">Thai</option><option value="tr">Turkish</option><option value="uk">Ukrainian</option><option value="vi">Vietnamese</option></select>
+		</td>
+		<td>手机号 :</td>
+		<td>
+		<input class="easyui-textbox" type="text" name="rent_p_tel" ></input>
+		</td>
+		<td>租用日期:</td>
+		<td>
+		<!-- <input id="txtDate" class="easyui-datetimebox" type="text" name="rent_begindate" ></input> -->
+		<input id="txtDate" style="border: 1px solid #95b8e7;border-radius: 5px;" class="Wdate" type="text" name="rent_begindate" onFocus="WdatePicker({dateFmt:'yyyy/MM/dd HH:mm:ss'})"/>
+		</td>
+		<td>返还日期:</td>
+		<td>
+		<!-- <input id="txtDate" class="easyui-datetimebox" type="text" name="rent_enddate" ></input> -->
+		<input style="border: 1px solid #95b8e7;border-radius: 5px;" class="Wdate" type="text" name="rent_enddate" onFocus="WdatePicker({dateFmt:'yyyy/MM/dd HH:mm:ss',minDate:'#F{$dp.$D(\'txtDate\')}'})"/>
+		</td>
+		</tr>
+		
+		<tr>
+		<td>设备号 :</td>
+		<td>
+		<input class="easyui-textbox" type="text" name="equipment_no" ></input>
+		</td>
+		<td>3G卡租赁费用 :</td>
+		<td>
+		<input id="cost_rent" onkeyup="keyups(this.value)" style="border: 1px solid #95b8e7;border-radius: 5px;height: 20px;" type="text" name="cost_rent_3g" ></input>
+		<span id="cost_rent_span"></span>
+		</td>
+		<td>设备租赁费用 :</td>
+		<td>
+		<input id="cost_equipment" onkeyup="keyups1(this.value)" style="border: 1px solid #95b8e7;border-radius: 5px;height: 20px;" type="text" name="cost_rent_equipment" ></input>
+		<span id="costequipment"></span>
+		</td>
+		<td>押金 :</td>
+		<td>
+		<input id="cost_return" style="border: 1px solid #95b8e7;border-radius: 5px;height: 20px;" type="text" name="cost_return_discount" value="400"  ></input>
+		</td>
+		</tr>
+		
+		<tr>
+		<td>预收总金额 :</td>
+		<td>
+		<input id="upfront_sum" style="border: 1px solid #95b8e7;border-radius: 5px;height: 20px;" type="text" readonly="readonly" name="upfront_sum" ></input>
+		</td>
+		<td>日期 :</td>
+		<td>
+		<!-- <input id="txtDate" class="easyui-datetimebox" type="text" name="create_time" ></input> -->
+		<input id="start" style="border: 1px solid #95b8e7;border-radius: 5px;" class="Wdate" type="text" name="create_time" onFocus="WdatePicker({startDate:'%y-%M-01 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss',alwaysUseStartDate:true})"/>
+		<!-- readonly="true"  class="Wdate" onfocus="new WdatePicker(this)" -->
+		</td>
+		<td>操作员 :</td>
+		<td>
+		<input class="easyui-textbox" type="text" name="create_user" ></input>
+		</td>
+		</tr>
+		
+		</table>
+		</form>
+		
+		<div style="text-align:center;padding:5px;margin-left: 850px">
+		<a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()" style="width: 50px;">提交</a>
+		<a href="javascript:void(0)" class="easyui-linkbutton" onclick="clearForm()" style="width: 50px;">清空</a>
+		</div>
+		<!-- 表单结束 -->
+	</div>
+	<script language="javascript" type="text/javascript">  
+		   
+		/**     
+		 * 对Date的扩展，将 Date 转化为指定格式的String     
+		 * 月(M)、日(d)、12小时(h)、24小时(H)、分(m)、秒(s)、周(E)、季度(q) 可以用 1-2 个占位符     
+		 * 年(y)可以用 1-4 个占位符，毫秒(S)只能用 1 个占位符(是 1-3 位的数字)     
+		 * eg:     
+		 * (new Date()).pattern("yyyy-MM-dd hh:mm:ss.S") ==> 2006-07-02 08:09:04.423     
+		 * (new Date()).pattern("yyyy-MM-dd E HH:mm:ss") ==> 2009-03-10 二 20:09:04     
+		 * (new Date()).pattern("yyyy-MM-dd EE hh:mm:ss") ==> 2009-03-10 周二 08:09:04     
+		 * (new Date()).pattern("yyyy-MM-dd EEE hh:mm:ss") ==> 2009-03-10 星期二 08:09:04     
+		 * (new Date()).pattern("yyyy-M-d h:m:s.S") ==> 2006-7-2 8:9:4.18     
+		 */       
+		Date.prototype.pattern=function(fmt) {        
+		    var o = {        
+		    "M+" : this.getMonth()+1, //月份        
+		    "d+" : this.getDate(), //日        
+		    "h+" : this.getHours()%12 == 0 ? 12 : this.getHours()%12, //小时        
+		    "H+" : this.getHours(), //小时        
+		    "m+" : this.getMinutes(), //分        
+		    "s+" : this.getSeconds(), //秒        
+		    "q+" : Math.floor((this.getMonth()+3)/3), //季度        
+		    "S" : this.getMilliseconds() //毫秒        
+		    };        
+		    var week = {        
+		    "0" : "\日",        
+		    "1" : "\一",        
+		    "2" : "\二",        
+		    "3" : "\三",        
+		    "4" : "\四",        
+		    "5" : "\五",        
+		    "6" : "\六"       
+		    };        
+		    if(/(y+)/.test(fmt)){        
+		        fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));        
+		    }        
+		    if(/(E+)/.test(fmt)){        
+		        fmt=fmt.replace(RegExp.$1, ((RegExp.$1.length>1) ? (RegExp.$1.length>2 ? "\星\期" : "\周") : "")+week[this.getDay()+""]);        
+		    }        
+		    for(var k in o){        
+		        if(new RegExp("("+ k +")").test(fmt)){        
+		            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));        
+		        }        
+		    }        
+		    return fmt;        
+		}      
+		    
+	/* 	$("#cost_equipment").blur(function(){
+			alert("ok");
+		}); */
+		
+		function keyups(costrent){
+			//alert("cost_rentkeydown");	
+			/* var costrent = $("#cost_rent").val(); */
+			if(!/^(-?\d+)(\.|\.\d+)?$/.test(costrent)){
+				$("#cost_rent_span").html("*请输入数字").css("color","red");
+			}else{
+				$("#cost_rent_span").empty();
+			}
+			
+			//alert("keyup");
+			var cost_rent = $("#cost_rent").val();
+			cost_rent = parseInt(cost_rent);
+			//alert("3g租赁费用"+typeof(cost_rent));
+			var cost_equipment = $("#cost_equipment").val();
+			cost_equipment = parseInt(cost_equipment);
+			//alert("设备租赁费用"+cost_equipment);
+			var cost_return = $("#cost_return").val();
+			cost_return = parseInt(cost_return);
+			//alert("押金"+cost_return);
+			var upfront_sum = cost_rent+cost_equipment+cost_return;
+			$("#upfront_sum").val(upfront_sum);
+			/* //alert(typeof(costrent));
+			if(!num.test(costrent)){
+				alert("is not a number");
+				$("#cost_rent_span").html("*请输入数字").css("color","red");
+			} */
+		}
+		
+		function keyups1(costrent){
+			//alert("cost_rentkeydown");	
+			/* var costrent = $("#cost_rent").val(); */
+			if(!/^(-?\d+)(\.|\.\d+)?$/.test(costrent)){
+				$("#costequipment").html("*请输入数字").css("color","red");
+			}else{
+				$("#costequipment").empty();
+			}
+			
+			//alert("keyup");
+			var cost_rent = $("#cost_rent").val();
+			cost_rent = parseInt(cost_rent);
+			//alert("3g租赁费用"+typeof(cost_rent));
+			var cost_equipment = $("#cost_equipment").val();
+			cost_equipment = parseInt(cost_equipment);
+			//alert("设备租赁费用"+cost_equipment);
+			var cost_return = $("#cost_return").val();
+			cost_return = parseInt(cost_return);
+			//alert("押金"+cost_return);
+			var upfront_sum = cost_rent+cost_equipment+cost_return;
+			$("#upfront_sum").val(upfront_sum);
+			/* //alert(typeof(costrent));
+			if(!num.test(costrent)){
+				alert("is not a number");
+				$("#cost_rent_span").html("*请输入数字").css("color","red");
+			} */
+		}
+		
+		/* $("#cost_equipment").keyup(function(){
+			//alert("keyup");
+			var cost_rent = $("#cost_rent").val();
+			cost_rent = parseInt(cost_rent);
+			//alert("3g租赁费用"+typeof(cost_rent));
+			var cost_equipment = $("#cost_equipment").val();
+			cost_equipment = parseInt(cost_equipment);
+			//alert("设备租赁费用"+cost_equipment);
+			var cost_return = $("#cost_return").val();
+			cost_return = parseInt(cost_return);
+			//alert("押金"+cost_return);
+			var upfront_sum = cost_rent+cost_equipment+cost_return;
+			$("#upfront_sum").val(upfront_sum);
+		}); */
+		//var date = new Date();     
+		//window.alert(date.pattern("yyyy-MM-dd hh:mm:ss"));  
+		// 
+</script>    
+
+</body>
+ <script>
+		function submitForm(){
+		$('#ff').submit();
+		}
+		function clearForm(){
+		$('#ff').form('clear');
+		}
+		$(function(){
+			$("#start").val(new Date().pattern("yyyy/MM/dd hh:mm:ss"));
+		});
+		/*  $(function () {
+	            $("#txtDate").datetimebox({
+	                formatter: function (date) {
+	                    var y = date.getYear();
+	                    var m = date.getMonth() + 1;
+	                    var d = date.getDate();
+	                    var h = date.getHours();
+	                    var M = date.getMinutes();
+	                    var s = date.getSeconds();
+	                    return y + "/" + (m < 10 ? ("0" + m) : m) + "/" + (d < 10 ? ("0" + d) : d)+" "+(h < 10 ? ("0" + h) : h)+":"+(M < 10 ? ("0" + M) : M)+":"+(s < 10 ? ("0" + s) : s) ;
+	                }
+	            });
+	        }); */
+	        
+	        
+</script>
+</html>

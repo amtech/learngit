@@ -1,0 +1,79 @@
+package com.jxc.web.user.service;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.jxc.web.user.dao.OrderDao;
+import com.jxc.web.user.model.OrderEntity;
+
+@Service
+public class OrderService {
+	@Autowired
+	private OrderDao orderDao;
+	
+	/**
+	 * 添加3g订购卡
+	 * @param orders
+	 */
+	public void addOrder(OrderEntity orders){
+		orderDao.addOrder(orders);
+	}
+	/**
+	 * 查询全部3g订购卡
+	 * @return
+	 */
+	public List<OrderEntity> queryOrder(){
+		return orderDao.queryOrder();
+	}
+	/**
+	 * 根据设备号或者手机号查询3g订购卡
+	 * @param equipment_no
+	 * @param rent_p_tel
+	 * @return
+	 */
+	public OrderEntity queryOrderByNum(String equipment_no,String rent_p_tel){
+		return orderDao.queryOrderByNum(equipment_no, rent_p_tel);
+	}
+	
+	public OrderEntity queryOrderByNum(Map map){
+		return orderDao.queryOrderByNum(map);
+	}
+	/*public OrderEntity queryOrderByNum(String sqls){
+		return orderDao.queryOrderByNum(sqls);
+	}*/
+	/**
+	 * 分页查询方法
+	 * @param start 当前页第一条条数
+	 * @param number 每页的条数
+	 * @return
+	 */
+	public List<OrderEntity> queryOrderByPage(int start,int number){
+		return orderDao.queryOrderByPage(start, number);
+	}
+	/*public void updateEquipment(String equipment_no, String rent_enddate,
+			String cost_sum, String remark){
+			orderDao.updateEquipment(equipment_no, rent_enddate, cost_sum, remark);
+	}*/
+	/**
+	 * 查询总条数
+	 * @return
+	 */
+	public int queryOrderRows(){
+		return orderDao.queryOrderRows();
+	}
+	/**
+	 * 根据设备号查询目的地
+	 * @param equipment_no
+	 * @return
+	 */
+	public String queryDcountry(String equipment_no){
+		return orderDao.queryDcountry(equipment_no);
+	}
+	
+	public void updateOrder(OrderEntity oe){
+		orderDao.updateOrder(oe);
+	}
+}

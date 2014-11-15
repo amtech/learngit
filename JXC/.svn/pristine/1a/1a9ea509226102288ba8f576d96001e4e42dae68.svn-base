@@ -1,0 +1,161 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>登陆首页</title>
+	<link rel="stylesheet" type="text/css" href="media/css/easyui.css">
+	<link rel="stylesheet" type="text/css" href="media/css/icon.css">
+	<link rel="stylesheet" type="text/css" href="media/css/demo.css">
+	<script type="text/javascript" src="media/js/jquery.min.js"></script>
+	<script type="text/javascript" src="media/js/jquery.easyui.min.js"></script>
+	<style type="text/css">
+		a:link,a:visited {color: blue; text-decoration:none;font-size:16px;} //未访问：蓝色、无下划线   
+		/* a:VISITED{color: blue; text-decoration:none;font-size:16px;}//点击后样式不变 */
+		.divstyle{
+			backgroundColor:"rgb(226,224,200)";
+		}
+		a div{
+			font-size:16px;
+			width:100%;
+			height: 30px;
+			text-align:center;
+			padding-top: 4px;
+		}
+	</style>
+</head>
+<body class="easyui-layout" style="background-color: #F8F8FF;">
+	<!-- <div data-options="region:'west',split:true,title:'菜单栏'" style="width:150px;padding:10px;"> -->
+		<!-- <dl >
+			<dt style="font-size: 20px;">订单管理</dt>
+			<dd><a href="#" onclick="orderlist();" >订单列表</a></dd>
+			<dd><a href="#" onclick="addlist();">增加订单</a></dd>
+			<dd><a href="#" onclick="searchs();">查询订单</a></dd>
+		</dl> -->
+			<div style="width: 100%;font-size: 18px;border: thin;">订单管理</div>
+			<a href="#" onclick="clickutil('order','add');"><div id="orderadd" onmouseenter="enter('orderadd')" onmouseleave="leave('orderadd')" >设备订购</div></a>
+			<a href="#" onclick="clickutil('order','search');"><div id="searchorder" onmouseenter="enter('searchorder')" onmouseleave="leave('searchorder')"  >设备退还</div></a>
+			<a a href="#" onclick="clickutil('order','list');"><div id="orderlist" onmouseenter="enter('orderlist')" onmouseleave="leave('orderlist')" >订单管理</div></a>
+			
+			<div style="width: 100%;font-size: 18px;border: thin;">设备管理</div>
+			<a href="#" onclick="clickutil('equipment','getAll');"><div id="equipmentlist" onmouseenter="enter('equipmentlist')" onmouseleave="leave('equipmentlist')"  >设备列表</div></a>
+			<a href="#" onclick="clickutil('equipment','add');"><div id="equipmentadd" onmouseenter="enter('equipmentadd')" onmouseleave="leave('equipmentadd')"  >添加设备</div></a>
+			
+			<div style="width: 100%;font-size: 18px;border: thin;">数据卡管理</div>
+			<a href="#" onclick="clickutil('info','list');"><div id="infolist" onmouseenter="enter('infolist')" onmouseleave="leave('infolist')"  >数据卡列表</div></a>
+			<a href="#" onclick="clickutil('info','add');"><div id="infoadd" onmouseenter="enter('infoadd')" onmouseleave="leave('infoadd')"  >添加数据卡</div></a>
+			
+			<div style="width: 100%;font-size: 18px;border: thin;">系统管理</div>
+			<a href="#" onclick="clickutil('user','add');"><div id="useradd" onmouseenter="enter('useradd')" onmouseleave="leave('useradd')"  >新增用户</div></a>
+			<a href="#" onclick="clickutil('user','discountday');"><div id="userdiscountday" onmouseenter="enter('userdiscountday')" onmouseleave="leave('userdiscountday')"  >优惠天数</div></a>
+			<a href="#" onclick="clickutil('user','managephoto');"><div id="managephoto" onmouseenter="enter('managephoto')" onmouseleave="leave('managephoto')"  >经营图表</div></a>
+			<a href="#" onclick="clickutil('user','daymanageinfo');"><div id="daymanageinfo" onmouseenter="enter('daymanageinfo')" onmouseleave="leave('daymanageinfo')"  >日经营情况</div></a>
+		<!-- <dl>
+			<dt><h2>人员管理</h2></dt>
+			<dd><a href="#" onclick="userlist();">人员列表</a></dd>
+			<dd><a href="../user/list">增加人员</a></dd>
+			<dd><a href="../user/list">修改人员</a></dd>
+			<dd><a href="../user/list">删除人员</a></dd>
+		</dl>
+		<dl>
+			<dt><h2>柜台管理</h2></dt>
+			<dd><a href="#" onclick="f1();">柜台列表</a></dd>
+		</dl>
+		<dl>
+			<dt><h2>设备管理</h2></dt>
+			<dd><a href="#" onclick="equipmentlist();">设备管理列表</a></dd>
+		</dl>
+		<dl>
+			<dt><h2>国际漫游卡</h2></dt>
+			<dd><a href="#" onclick="infolist();">国际漫游卡列表</a></dd>
+		</dl> -->
+		
+	<!-- </div> -->
+	
+	<div id="menu_shadow" style="display: none; z-index: 1000; top: 0px; left: 0px; position: fixed; height: 100%; width: 100%;opacity:0.8; background-color:#708090;">
+	</div>
+	<script type="text/javascript">
+		//=============柜台菜单点击方法 开始===============================
+		function clickutil(str,address){
+			//alert("ooclick");
+			/*  jQuery.ajax({
+		        	url:"firstofall",
+		        	type:"POST",
+		        	error:function(request){
+		        		//alert("no data");
+		        	},
+		        	success:function(data){
+		        		if(data=="0"){
+		        			alert("此用户已在别处登陆，请重新登陆");
+		        			top.window.location ="login";
+		        			//reutrn false; 
+		        			//top.document.getElementById("countents").src = ;
+		        		}else{
+		        			reutrn false;  
+		        		}
+		        	}
+		        	});	 */
+			top.document.getElementById("countents").src = str+"/"+address;
+		}
+		
+		function f1(){
+			parent.frames["countents"].src = "counter/list";
+		}
+		//=============柜台菜单点击方法 结束===============================
+		/******************************************************************/
+		//=============3g订购卡菜单点击方法 开始===============================
+		function orderlist(){
+			//alert("parent.");
+			//alert(top.document.getElementById("countents").src);
+			//alert(parent.frames["countents"]);
+			//parent.frames["countents"].src = "order/list";
+			top.document.getElementById("countents").src = "order/list";
+		}
+		function addlist(){
+			top.document.getElementById("countents").src = "order/add";
+			
+		}
+		function searchs(){
+			top.document.getElementById("countents").src = "order/search";
+		}
+		//=============3g订购卡菜单点击方法 开始===============================
+		/******************************************************************/
+		//=============用户菜单点击方法 开始===============================
+		function userlist(){
+			parent.frames["countents"].src = "user/list";
+		}
+		//=============用户菜单点击方法 结束===============================
+		/******************************************************************/
+		//=============设备菜单点击方法 开始===============================
+		function equipmentlist(){
+			top.document.getElementById("countents").src = "equipment/getAll";
+		}
+		function equipmentadd(){
+			top.document.getElementById("countents").src = "equipment/add";
+		}
+		//=============设备菜单点击方法 结束===============================
+		/******************************************************************/
+		//=============国际漫游卡菜单点击方法 开始===============================
+		function infolist(){
+			parent.frames["countents"].src = "info/list";
+		}
+		//=============国际漫游卡菜单点击方法 结束===============================
+			
+		function enter(obj){
+			/* alert(obj);
+			alert(obj.style+":"+obj.style.cssText);
+			 */
+			var objs = document.getElementById(obj);
+			/* objs.css("backgroundColor","rgb(226,224,200)"); */
+			objs.style.backgroundColor="rgb(226,224,200)";
+		}
+		function leave(obj){
+			var objs = document.getElementById(obj);
+			objs.style.backgroundColor="";
+		}
+	</script>
+</body>
+ 
+</html>

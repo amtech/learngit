@@ -1,0 +1,13 @@
+package com.jxc.web.user.dao;
+
+import java.util.List;
+
+import com.jxc.web.user.model.CounterEntity;
+import com.jxc.web.user.model.EquipmentEntity;
+
+public interface CounterDao {
+		//添加方法
+		public void add(CounterEntity counter);
+		//查询方法
+		public List<CounterEntity> getList();
+}	

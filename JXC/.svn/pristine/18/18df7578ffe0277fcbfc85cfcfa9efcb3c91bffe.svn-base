@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 
+	"-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jxc.web.user.dao.UserDao">
+	<resultMap type="com.jxc.web.user.model.UserEntity" id="R_USER_ENTITY" />
+	<resultMap type="com.jxc.web.user.model.CounterEntity" id="R_Counter_ENTITY" />
+	<resultMap type="String" id="str" />
+	<!-- 查询子模块菜单 -->
+	<select id="queryUserforLogin" resultMap="R_USER_ENTITY"
+		parameterType="map">
+		select * from t_3g_user where USERNAME = #{username} and PASSWORD = #{password}
+	</select>
+	<!-- 插入数据 -->
+	<select id="saveUserforRegist" resultMap="R_USER_ENTITY"
+		parameterType="map">
+		INSERT INTO `t_3g_user` (`ID`,`USERNAME`, `PASSWORD`, `NAME`, `SEX`, `IDNUMBER`, `BIRTH`, `MOBILE`, `COUNTERID`, `HEADID`, `CONTACTS_NAME`, `CONTACTS_TEL`, `ENTRY_DATE`, `ADDRESS`, `GRADETYPE`, `IS_VALID`)
+		VALUES (#{id},#{username}, #{password}, #{name}, #{sex}, #{idnumber}, #{birth}, #{mobile}, #{counterid}, #{headid}, #{contactsname}, #{contactstel}, #{entrydate}, #{address}, #{gradetype}, #{isvalid});
+	</select>
+	<!-- 查询所有人员 -->
+	<select id="queryUser" resultMap="R_USER_ENTITY"
+		parameterType="map">
+		SELECT `ID`, `USERNAME`, `PASSWORD`, `NAME`, `SEX`, `IDNUMBER`, `BIRTH`, `MOBILE`, `COUNTERID`, `HEADID`, `CONTACTS_NAME`, `CONTACTS_TEL`, `ENTRY_DATE`, `ADDRESS`, `GRADETYPE`, `IS_VALID`, `CREATE_USER`, `CREATE_TIME`, `MODIFY_USER`, `MODIFY_TIME`, `REMARK`, `SORT` FROM `sky`.`t_3g_user`;
+	</select>
+	<!-- 查询当前登陆人员信息 -->
+	<select id="saveUserInfo" resultMap="R_USER_ENTITY"
+		parameterType="map">
+		SELECT `ID`, `USERNAME`,`HEADID`,`GRADETYPE` FROM `sky`.`t_3g_user` WHERE USERNAME = #{username};
+	</select>
+	<!-- 根据当前登录人的ID查询所在地 -->
+	<select id="queryCountry" resultMap="R_Counter_ENTITY" parameterType="map">
+		<!-- SELECT tc.COUNTRY FROM t_3g_counter tc LEFT JOIN t_3g_user tu ON tu.COUNTERID = tc.ID AND tu.COUNTERID=#{counterid}; -->
+		<!-- SELECT COUNTRY FROM t_3g_counter WHERE ID = (SELECT COUNTERID FROM t_3g_user WHERE ID = #{id}); -->
+		SELECT tc.COUNTRY,tc.NAME,tc.COUNTER_CODE FROM t_3g_counter tc LEFT JOIN t_3g_user tu ON tc.ID = tu.COUNTERID WHERE tu.ID = #{id};
+	</select>
+</mapper>

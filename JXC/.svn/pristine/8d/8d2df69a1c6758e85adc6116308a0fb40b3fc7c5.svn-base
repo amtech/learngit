@@ -1,0 +1,86 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>登陆首页</title>
+	<link rel="stylesheet" type="text/css" href="media/css/easyui.css">
+	<link rel="stylesheet" type="text/css" href="media/css/icon.css">
+	<link rel="stylesheet" type="text/css" href="media/css/demo.css">
+	<script type="text/javascript" src="media/js/jquery.min.js"></script>
+	<script type="text/javascript" src="media/js/jquery.easyui.min.js"></script>
+	<style type="text/css">
+		a:link {color: blue; text-decoration:none;} //未访问：蓝色、无下划线   
+	</style>
+</head>
+<body class="easyui-layout">
+	<!-- <div data-options="region:'west',split:true,title:'菜单栏'" style="width:150px;padding:10px;"> -->
+		<dl>
+			<dt><h2>订单管理</h2></dt>
+			<dd><a href="#" onclick="orderlist();" >订单列表</a></dd>
+			<dd><a href="#" onclick="addlist();">增加订单</a></dd>
+			<dd><a href="#" onclick="searchs();">查询订单</a></dd>
+		</dl>
+		<dl>
+			<dt><h2>人员管理</h2></dt>
+			<dd><a href="#" onclick="userlist();">人员列表</a></dd>
+			<dd><a href="../user/list">增加人员</a></dd>
+			<dd><a href="../user/list">修改人员</a></dd>
+			<dd><a href="../user/list">删除人员</a></dd>
+		</dl>
+		<dl>
+			<dt><h2>柜台管理</h2></dt>
+			<dd><a href="#" onclick="f1();">柜台列表</a></dd>
+		</dl>
+		<dl>
+			<dt><h2>设备管理</h2></dt>
+			<dd><a href="#" onclick="equipmentlist();">设备管理列表</a></dd>
+		</dl>
+		<dl>
+			<dt><h2>国际漫游卡</h2></dt>
+			<dd><a href="#" onclick="infolist();">国际漫游卡列表</a></dd>
+		</dl>
+		
+	<!-- </div> -->
+	<script type="text/javascript">
+		//=============柜台菜单点击方法 开始===============================
+		function f1(){
+			parent.frames["countents"].src = "counter/counter.jhtml";
+		}
+		//=============柜台菜单点击方法 结束===============================
+		/******************************************************************/
+		//=============3g订购卡菜单点击方法 开始===============================
+		function orderlist(){
+			parent.frames["countents"].src = "order/list";
+		}
+		function addlist(){
+			parent.frames["countents"].src = "order/add";
+		}
+		function searchs(){
+			parent.frames["countents"].src = "order/search";
+		}
+		//=============3g订购卡菜单点击方法 开始===============================
+		/******************************************************************/
+		//=============用户菜单点击方法 开始===============================
+		function userlist(){
+			parent.frames["countents"].src = "user/list";
+		}
+		//=============用户菜单点击方法 结束===============================
+		/******************************************************************/
+		//=============设备菜单点击方法 开始===============================
+		function equipmentlist(){
+			parent.frames["countents"].src = "equipment/list";
+		}
+		//=============设备菜单点击方法 结束===============================
+		/******************************************************************/
+		//=============国际漫游卡菜单点击方法 开始===============================
+		function infolist(){
+			parent.frames["countents"].src = "info/list";
+		}
+		//=============国际漫游卡菜单点击方法 结束===============================
+	</script>
+</body>
+ 
+</html>

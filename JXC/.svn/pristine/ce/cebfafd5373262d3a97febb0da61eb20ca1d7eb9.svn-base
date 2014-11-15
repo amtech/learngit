@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 
+	"-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jxc.web.user.dao.OrderDao">
+	<resultMap type="com.jxc.web.user.model.OrderEntity" id="R_Order_ENTITY" />
+	<resultMap type="Integer" id="ints" />
+	<resultMap type="java.lang.String" id="str" />
+	<resultMap type="List" id="li"/>
+	<resultMap type="java.util.HashMap" id="hashmap"></resultMap>
+	
+	<!-- 插入数据 -->
+	<insert id="addOrder"  parameterType="map">
+		INSERT INTO `sky`.`t_3g_order` (`ID`, `ORDER_NUM`, `RENT_P_NAME`, `RENT_P_IDNUMBER`, `RENT_P_PASSPORTNO`, `RENT_P_NATIONALITY`, `RENT_P_TEL`, `RENT_BEGINDATE`, `RENT_EXPECTDATE`, `EQUIPMENT_NO`, `COST_RENT_3G`, `COST_RENT_EQUIPMENT`, `COST_RETURN_DISCOUNT`, `COST_SUM`, `CREATE_USER`, `CREATE_TIME`,`REMARK`,`UPFRONT_SUM`,`D_COUNTRY`,`S_COUNTRY`,`IS_VALID`,`PAYMENT`,`MODIFY_USER`,`MODIFY_TIME`,`RENT_DAY`,`ORDER_STATE`,`USEID`)
+		VALUES (#{id}, #{order_num}, #{rent_p_name}, #{rent_p_idnumber}, #{rent_p_passportno}, #{rent_p_nationality}, #{rent_p_tel}, #{rent_begindate}, #{rent_expectdate}, #{equipment_no}, #{cost_rent_3g}, #{cost_rent_equipment}, #{cost_return_discount}, #{cost_sum}, #{create_user}, #{create_time},#{remark},#{upfront_sum},#{d_country},#{s_country},'0001',#{payment},#{create_user}, #{create_time},#{rent_day},'0001',#{useid});
+	</insert>
+	<select id="queryOrder" resultMap="R_Order_ENTITY" parameterType="map">
+		<!-- SELECT `ID`, `ORDER_NUM`, `RENT_P_NAME`, `RENT_P_IDNUMBER`, `RENT_P_PASSPORTNO`, `RENT_P_NATIONALITY`, `RENT_P_TEL`, `RENT_BEGINDATE`, `RENT_ENDDATE`, `EQUIPMENT_NO`, `COST_RENT_3G`, `COST_RENT_EQUIPMENT`, `COST_RETURN_DISCOUNT`, `COST_SUM`, `CREATE_USER`, `CREATE_TIME` FROM t_3g_order; -->
+		SELECT * FROM  t_3g_order  ORDER BY ORDER_STATE,RENT_ENDDATE DESC,RENT_EXPECTDATE ASC;
+	</select>
+	<!-- 根据手机号或者设备号查询EQUIPMENT_NO = #{0} OR RENT_P_TEL = #{1}  -->
+	<!-- <select id="queryOrderByNum" resultMap="R_Order_ENTITY" parameterType="String">
+	   select * from t_3g_order where 1 = #{sqls} ;
+	</select> -->
+	<select id="queryOrderByNum" resultMap="R_Order_ENTITY" parameterType="map">
+	  <!--  select * from t_3g_order WHERE IS_VALID = '0001' AND RENT_ENDDATE IS NULL  AND a.EQUIPMENT_TYPE='0002' -->
+	   select * from t_3g_order t LEFT JOIN allequipment a ON t.EQUIPMENT_NO = a.`NO` WHERE t.IS_VALID = '0001' AND a.EQUIPMENT_STATE = '0002'
+	   <choose>
+	   		<when test="rent_p_tel !=null">
+	   			AND t.RENT_P_TEL = #{rent_p_tel} ORDER BY t.MODIFY_TIME LIMIT 0,1;;
+	   		</when>
+	   		<when test="equipment_no != null">
+	   			AND t.EQUIPMENT_NO = #{equipment_no} ORDER BY t.MODIFY_TIME LIMIT 0,1;;
+	   		</when>
+	   		<when test="equipment_no!=null and rent_p_tel != null">
+	   			AND t.RENT_P_TEL = #{rent_p_tel} AND t.EQUIPMENT_NO = #{equipment_no} ORDER BY t.MODIFY_TIME LIMIT 0,1;;
+	   		</when>
+	   		<!-- <if test="(#{0]) !=null">
+	   			 EQUIPMENT_NO = #{0};
+	   		</if>
+	   		<if test="(#{0}) !=null and (#{1}) !=null">
+	   			 RENT_P_TEL = #{1} AND EQUIPMENT_NO = #{0};
+	   		</if> -->
+	   </choose>
+	</select>
+	
+	<!-- 根据订单中的设备号修改设备信息：设备返还日期，设备租金，备注 -->
+	<!-- <select id="update_equipment" resultMap="R_Equipment_ENTITY" parameterType="map">
+		UPDATE `sky`.`t_3g_equipment` SET `TOTAL_RENT`=#{2},`REMARK`=#{3}, `RENT_ENDDATE`=#{1} WHERE  `NO`=#{0};
+	</select> -->
+	<!-- 分页查询 -->
+	<select id="queryOrderByPage" resultMap="R_Order_ENTITY" parameterType="map">
+		<!-- SELECT `ID`, `ORDER_NUM`, `RENT_P_NAME`, `RENT_P_IDNUMBER`, `RENT_P_PASSPORTNO`, `RENT_P_NATIONALITY`, `RENT_P_TEL`, `RENT_BEGINDATE`, `RENT_ENDDATE`, `EQUIPMENT_NO`, `COST_RENT_3G`, `COST_RENT_EQUIPMENT`, `COST_RETURN_DISCOUNT`, `COST_SUM`, `CREATE_USER`, `CREATE_TIME` FROM t_3g_order ORDER BY CREATE_TIME DESC LIMIT #{0},#{1} ; -->
+		SELECT * FROM t_3g_order WHERE USEID = #{useid}
+		<if test="gradetype == '0000'">
+			OR 1 = 1
+		</if>
+		<if test="gradetype == '0002'">
+			OR USEID IN (SELECT ID FROM t_3g_user WHERE HEADID = #{useid})
+		</if>
+		 ORDER BY ORDER_STATE,RENT_ENDDATE DESC,RENT_EXPECTDATE ASC LIMIT #{start},#{number}  ;
+	</select>
+	<!-- 查询共有多少条记录 -->
+	<select id="queryOrderRows" resultMap="ints" parameterType="map">
+		SELECT COUNT(*) FROM t_3g_order ;
+	</select>
+	<!-- 根据设备号查询目的地 -->
+	<select id="queryDcountry" resultMap="str" parameterType="map">
+		<!-- SELECT D_COUNTRY FROM t_3g_order WHERE EQUIPMENT_NO = #{equipment_no}; -->
+		SELECT tl.ITEM_TEXT FROM t_info_code_line tl LEFT JOIN t_info_code tc ON tc.ID=tl.CODEID WHERE tc.CODE='country' AND tl.ITEM_VALUE = (SELECT COUNTRY FROM t_3g_info WHERE ID = (SELECT SIM_ID FROM t_3g_equipment WHERE NO = #{equipment_no} ORDER BY MODIFY_TIME LIMIT 0,1));
+	</select>
+	<!-- 退还后更新订单 -->
+	<update id="updateOrder" parameterType="com.jxc.web.user.model.OrderEntity">
+		UPDATE t_3g_order SET RENT_ENDDATE = #{rent_enddate}, COST_RETURN_DISCOUNT = #{cost_return_discount},COST_SUM=#{cost_sum},COST_DISCOUNT = #{cost_discount},MODIFY_USER=#{modify_user},MODIFY_TIME=#{modify_time},REMARK=#{remark},RENT_P_IDNUMBER=#{rent_p_idnumber},RENT_P_PASSPORTNO=#{rent_p_passportno},ORDER_STATE='0002',USEID = #{useid}  WHERE ORDER_NUM = #{order_num};
+	</update>
+	<!-- 查询支付方式 ,及其对应的编码-->
+	<select id="getPayment" resultMap="hashmap" parameterType="map">
+		SELECT tl.ITEM_TEXT,tl.ITEM_VALUE FROM t_info_code_line tl LEFT JOIN t_info_code tc ON tl.CODEID = tc.ID WHERE tc.CODE = 'payment' AND tl.`STATUS`='1' ORDER BY tl.SORTORDER;
+	</select>
+	<!-- 根据地区编码查询地区名称 -->
+	<select id="getCountry" resultMap="str" parameterType="map">
+		SELECT tl.ITEM_TEXT FROM t_info_code_line tl LEFT JOIN t_info_code tc ON tl.CODEID = tc.ID WHERE tc.CODE = 'country' AND tl.`STATUS`='1' AND ITEM_VALUE = #{itemvalue} ;
+	</select>
+	<!-- 根据地区名称查询地区编码 -->
+	<select id="getCountryCode" resultMap="str" parameterType="map">
+		SELECT tl.ITEM_VALUE FROM t_info_code_line tl LEFT JOIN t_info_code tc ON tl.CODEID = tc.ID WHERE tc.CODE = 'country' AND tl.`STATUS`='1' AND tl.ITEM_TEXT  = #{itemtext};
+	</select>
+	<!-- 根据支付方式代码查询支付方式 -->
+	<select id="getPaymentText" resultMap="str" parameterType="map">
+		SELECT tl.ITEM_TEXT FROM t_info_code_line tl LEFT JOIN t_info_code tc ON tl.CODEID = tc.ID WHERE tc.CODE = 'payment' AND tl.`STATUS`='1' AND ITEM_VALUE = #{paymentvalue} ;
+	</select>
+	<!-- 根据 手机号，设备号，租用日期，返还日期，目的地，租用人姓名，订单号查询订单 id,rent_p_name,rent_p_tel,equipment_no,rent_begindate,rent_expectdate,rent_enddate,d_country,payment,start,number,order_state-->
+	<select id="queryOrderWithConditons" resultMap="R_Order_ENTITY" parameterType="map">
+		<!-- SELECT * FROM t_3g_order WHERE ID = #{id} OR RENT_P_NAME = #{rent_p_name} OR RENT_P_TEL = #{rent_p_tel} '%${text}%' OR EQUIPMENT_NO = #{equipment_no} OR RENT_BEGINDATE = #{rent_begindate} OR RENT_ENDDATE = #{rent_enddate} OR D_COUNTRY = #{d_country} OR PAYMENT = #{payment} OR RENT_EXPECTDATE = #{rent_expectdate} LIMIT #{1},#{2}; -->
+		<!-- SELECT * FROM t_3g_order WHERE ID = #{0} OR RENT_P_NAME = #{1} OR RENT_P_TEL = #{2} OR EQUIPMENT_NO = #{3} OR RENT_BEGINDATE LIKE #{4}"%" OR RENT_EXPECTDATE LIKE #{5}"%" OR RENT_ENDDATE LIKE #{6}"%" OR D_COUNTRY = #{7} OR ORDER_STATE LIKE #{11}"%" OR PAYMENT LIKE #{8}"%"  LIMIT #{9},#{10}; -->
+		<!-- D_COUNTRY LIKE CONCAT(#{d_country},'%') AND ORDER_STATE LIKE CONCAT(#{order_state},'%') AND PAYMENT LIKE CONCAT(#{payment},'%') -->
+		SELECT * FROM t_3g_order WHERE 1 = 1
+		<if test="d_country!=''">
+			AND d_country = #{d_country}
+		</if>
+		<if test="order_state!=''">
+			AND order_state = #{order_state}
+		</if>
+		<if test="payment!=''">
+			AND payment = #{payment}
+		</if>
+		<if test="id!=''">
+			AND ID = #{id}
+		</if>
+		<if test="rent_p_name!=''">
+			AND RENT_P_NAME = #{rent_p_name}
+		</if>
+		<if test="rent_p_tel!=''">
+			AND RENT_P_TEL = #{rent_p_tel}
+		</if>
+		<if test="equipment_no!=''">
+			AND EQUIPMENT_NO = #{equipment_no}
+		</if>
+		<if test="rent_begindate!=''">
+			AND RENT_BEGINDATE LIKE CONCAT(#{rent_begindate},'%'}
+		</if>
+		<if test="rent_expectdate!=''">
+			AND RENT_EXPECTDATE LIKE CONCAT(#{rent_expectdate},'%')
+		</if>
+		<if test="rent_enddate!=''">
+			AND RENT_ENDDATE LIKE CONCAT(#{rent_enddate},'%')
+		</if>
+		 ORDER BY ORDER_STATE,RENT_ENDDATE DESC,RENT_EXPECTDATE ASC LIMIT #{start},#{number}; 
+	</select>
+	<!-- 根据 手机号，设备号，租用日期，返还日期，目的地，租用人姓名，订单号查询到订单的总条数 -->
+	<select id="queryOrderWithConditonsTotal" resultMap="ints" parameterType="map">
+		<!-- SELECT * FROM t_3g_order WHERE ID = #{id} OR RENT_P_NAME = #{rent_p_name} OR RENT_P_TEL = #{rent_p_tel} '%${text}%' OR EQUIPMENT_NO = #{equipment_no} OR RENT_BEGINDATE = #{rent_begindate} OR RENT_ENDDATE = #{rent_enddate} OR D_COUNTRY = #{d_country} OR PAYMENT = #{payment} OR RENT_EXPECTDATE = #{rent_expectdate} LIMIT #{1},#{2}; -->
+		<!-- SELECT * FROM t_3g_order WHERE ID = #{0} OR RENT_P_NAME = #{1} OR RENT_P_TEL = #{2} OR EQUIPMENT_NO = #{3} OR RENT_BEGINDATE LIKE #{4}"%" OR RENT_EXPECTDATE LIKE #{5}"%" OR RENT_ENDDATE LIKE #{6}"%" OR D_COUNTRY = #{7} OR ORDER_STATE LIKE #{11}"%" OR PAYMENT LIKE #{8}"%"  LIMIT #{9},#{10}; -->
+		SELECT count(*) FROM t_3g_order WHERE 1 = 1 
+		<if test="d_country!=''">
+			AND d_country = #{d_country}
+		</if>
+		<if test="order_state!=''">
+			AND order_state = #{order_state}
+		</if>
+		<if test="payment!=''">
+			AND payment = #{payment}
+		</if>
+		<if test="id!=''">
+			AND ID = #{id}
+		</if>
+		<if test="rent_p_name!=''">
+			AND RENT_P_NAME = #{rent_p_name}
+		</if>
+		<if test="rent_p_tel!=''">
+			AND RENT_P_TEL = #{rent_p_tel}
+		</if>
+		<if test="equipment_no!=''">
+			AND EQUIPMENT_NO = #{equipment_no}
+		</if>
+		<if test="rent_begindate!=''">
+			AND RENT_BEGINDATE LIKE CONCAT(#{rent_begindate},'%'}
+		</if>
+		<if test="rent_expectdate!=''">
+			AND RENT_EXPECTDATE LIKE CONCAT(#{rent_expectdate},'%')
+		</if>
+		<if test="rent_enddate!=''">
+			AND RENT_ENDDATE LIKE CONCAT(#{rent_enddate},'%')
+		</if>
+		LIMIT #{start},#{number}; 
+	</select>
+	<!-- 查询国籍及其对应的代码 -->
+	<select id="queryNationality" resultMap="hashmap">
+		SELECT tl.ITEM_TEXT,tl.ITEM_VALUE FROM t_info_code_line tl LEFT JOIN t_info_code tc ON tl.CODEID = tc.ID WHERE tc.CODE = 'nationality' AND tl.`STATUS`='1' ORDER BY tl.SORTORDER ;
+	</select>
+	<!-- 根据国籍代码获取国籍名称 -->
+	<select id="queryNationText" resultMap="str" parameterType="map">
+		SELECT tl.ITEM_TEXT FROM t_info_code_line tl LEFT JOIN t_info_code tc ON tl.CODEID = tc.ID WHERE tc.CODE = 'nationality' AND tl.`STATUS`='1' AND ITEM_VALUE = #{nationvalue} ;
+	</select>
+	<!-- 查询地区名称及其对应的代码 -->
+	<select id="getCountryVlueAndText" resultMap="hashmap">
+		SELECT tl.ITEM_TEXT,tl.ITEM_VALUE FROM t_info_code_line tl LEFT JOIN t_info_code tc ON tl.CODEID = tc.ID WHERE tc.CODE = 'country' AND tl.`STATUS`='1' ORDER BY tl.SORTORDER ;
+	</select>
+	<!-- 根据订单号查询订单 -->
+	<select id="getDetailByOrderNum" resultMap="R_Order_ENTITY" parameterType="map">
+		SELECT * FROM t_3g_order WHERE ORDER_NUM = #{order_num};
+	</select>
+</mapper>

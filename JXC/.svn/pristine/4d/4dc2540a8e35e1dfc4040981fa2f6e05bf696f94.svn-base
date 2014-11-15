@@ -1,0 +1,311 @@
+package com.jxc.web.user.ctrl;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.druid.util.StringUtils;
+import com.alibaba.fastjson.JSON;
+import com.jxc.web.user.model.EquipmentEntity;
+import com.jxc.web.user.model.OrderEntity;
+import com.jxc.web.user.service.EquipmentService;
+import com.jxc.web.user.service.OrderService;
+
+@Controller
+@RequestMapping("order")
+public class OrderCtl {
+	@Autowired
+	private OrderService orderService;
+	@Autowired
+	private EquipmentService eservice;
+	/**
+	 * 添加初始页面
+	 * @return
+	 */
+	@RequestMapping("add")
+	public String add(Model model,HttpServletRequest request){
+		String defaultdate = getStringToday();
+		HttpSession session = request.getSession();
+		String username = (String) session.getAttribute("username");
+		List<String> lists = orderService.getPayment();
+		List<String> nationality = orderService.queryNationality();
+		List<String> country = orderService.getCountryVlueAndText();
+		
+		model.addAttribute("country",country);
+		model.addAttribute("nationality",nationality);
+		model.addAttribute("paymentlist",lists);
+		model.addAttribute("defaultdate",defaultdate);
+		model.addAttribute("username",username);
+		return "order/order_add";
+	}
+	
+	/**
+	 * 添加表单提交操作,执行添加订单后修改设备信息，租用日期，预计返还日期，返还日期（暂时设置9999年）
+	 * @param order 订单类数据
+	 * @return
+	 */
+	@RequestMapping(value="add",method=RequestMethod.POST)
+	public String formAdd(OrderEntity order){
+		//System.out.println("执行到order_form_add");
+		//System.out.println(order);
+		order.setId(System.currentTimeMillis()+"");
+		order.setD_country(orderService.getCountryCode(order.getD_country()));
+		orderService.addOrder(order);
+		eservice.updateEquipmentAfterAdd(order.getEquipment_no(), order.getRent_begindate(), order.getRent_expectdate(), order.getRent_enddate(), order.getCreate_user(), order.getCreate_time(), order.getRemark(), order.getUpfront_sum());
+		return "order/order_add";
+	}
+	/**
+	 * 列表初始页
+	 * @return
+	 */
+	@RequestMapping(value="list")
+	public String list(Model model){
+		List<String> lists = orderService.getPayment();
+		model.addAttribute("paymentlist",lists);
+		return "order/order_list";
+	}
+	
+	/**
+	 * 获取列表操作
+	 * @param model
+	 * @param page 当前页数
+	 * @param rows 每条中的数据
+	 * @return
+	 */
+	@RequestMapping(value="getlist")
+	public @ResponseBody String queryOrder(Model model,String page,String rows){
+		//当前页  
+        int intPage = Integer.parseInt((page == null || page == "0") ? "1":page);  
+        //每页显示条数  
+        int number = Integer.parseInt((rows == null || rows == "0") ? "10":rows);  
+        //每页的开始记录  第一页为1  第二页为number +1  
+        if(intPage<=0)
+        	intPage = 1;
+        int start = (intPage-1)*number;  
+        int total = orderService.queryOrderRows();
+		List<OrderEntity> lists = new ArrayList<OrderEntity>();
+		//lists = orderService.queryOrder();
+		lists = orderService.queryOrderByPage(start, number);
+		for(OrderEntity od:lists){
+			if(od.getRent_begindate()!=null)
+			od.setRent_begindate(od.getRent_begindate().substring(0,od.getRent_begindate().length()-2));
+			if(od.getRent_enddate()!=null)
+			od.setRent_enddate(od.getRent_enddate().substring(0,od.getRent_enddate().length()-2));
+			if(od.getCreate_time()!=null)
+			od.setCreate_time(od.getCreate_time().substring(0,od.getCreate_time().length()-2));
+			if(od.getRent_expectdate()!=null)
+			od.setRent_expectdate(od.getRent_expectdate().substring(0,od.getRent_expectdate().length()-2));
+			od.setPayment(orderService.getPaymentText(od.getPayment()));
+			od.setD_country(orderService.getCountry(od.getD_country()));
+			od.setRent_p_nationality(orderService.queryNationText(od.getRent_p_nationality()));
+		}
+		
+		String ss = JSON.toJSONString(lists);
+		Map map = new HashMap();
+		map.put("total", total);
+		map.put("rows", lists);
+		
+		return JSON.toJSONString(map);
+	}
+	
+	/**
+	 * 搜索页面跳转
+	 * @param model
+	 * @param equipment_no 设备号
+	 * @param rent_p_tel 手机号
+	 * @return
+	 */
+	@RequestMapping(value="search")
+	public String search(Model model,String equipment_no,String rent_p_tel){
+		if(null==(equipment_no) || null==(rent_p_tel)){
+			return "order/order_search";
+		}
+		searchByNum(model, equipment_no, rent_p_tel);
+		return "order/order_search";
+	}
+	
+	/**
+	 * 页面传来参数：设备号，手机号，进行查询
+	 * @param model
+	 * @param equipment_no 设备号
+	 * @param rent_p_tel 手机号
+	 * @return
+	 */
+	@RequestMapping(value="search",method=RequestMethod.POST)
+	public String searchByNum(Model model,String equipment_no, String rent_p_tel){
+//		OrderEntity oe = orderService.queryOrderByNum(equipment_no, rent_p_tel);
+		//System.out.println(equipment_no+":"+(rent_p_tel==null)+(rent_p_tel==" ")+(rent_p_tel==""));
+		//System.out.println(equipment_no.trim()+":"+rent_p_tel.trim()==null);
+		//String sqls = "";
+		if(equipment_no=="" && rent_p_tel != ""){
+			equipment_no = null;
+			//sqls = "1 AND RENT_P_TEL= '"+rent_p_tel+"'";
+		}else if(equipment_no!="" && rent_p_tel==""){
+			rent_p_tel = null;
+			//sqls = "1 AND EQUIPMENT_NO = '"+equipment_no+"'";
+		}else if(equipment_no=="" && rent_p_tel==""){
+			return "order/order_search";
+		}
+		//OrderEntity oe = orderService.queryOrderByNum(equipment_no,rent_p_tel);
+		Map map = new HashMap();
+		map.put("equipment_no", equipment_no);
+		map.put("rent_p_tel", rent_p_tel);
+		OrderEntity oe = orderService.queryOrderByNum(map);
+		if(oe==null){
+			model.addAttribute("message","未查询到有效订单，请从新输入查询条件!");
+			return "order/order_search";
+		}
+		//EquipmentEntity ee = eservice.queryDayRent(oe.getEquipment_no());
+		//System.out.println(ee.getDeposit());
+//		if(ee==null){
+//			model.addAttribute("message","此设备暂未归还，请重新选择!");
+//			return "order/order_search";
+//		}
+		EquipmentEntity ee = eservice.queryIsValid(oe.getEquipment_no());
+		//System.out.println(ee.getIs_valid());
+		//System.out.println(ee.getIs_valid().equals("0001")); true
+		//System.out.println(ee.getIs_valid()=="0001");false
+		if("0001".equals(ee.getIs_valid())){
+			//System.out.println("==========");
+			model.addAttribute("deposit",ee.getDeposit());
+		}else{
+			model.addAttribute("message","此设备暂未归还，请重新选择!");
+			return "order/order_search";
+		}
+		Date date = new Date();
+		SimpleDateFormat df=new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		String rent_begindate = oe.getRent_begindate();
+		String rent_expectdate = oe.getRent_expectdate();
+		oe.setPayment(orderService.getPaymentText(oe.getPayment()));
+		if(rent_begindate != null){
+		rent_begindate = rent_begindate.substring(0,rent_begindate.length()-2);
+		rent_begindate = rent_begindate.replace("-", "/");
+		}
+		if(rent_expectdate!=null){
+			rent_expectdate = rent_expectdate.substring(0,rent_expectdate.length()-2);
+			rent_expectdate = rent_expectdate.replace("-", "/");
+		}
+		/*oe.setRent_begindate(rent_begindate);
+		oe.setRent_expectdate(rent_expectdate);*/
+		oe.setCreate_time(df.format(date));
+		if(equipment_no==null){
+			equipment_no = "";
+		}
+		if(rent_p_tel==null){
+			rent_p_tel = "";
+		}
+		String equn = equipment_no;
+		String rent = rent_p_tel;
+		model.addAttribute("rent_begindate",rent_begindate);
+		model.addAttribute("rent_expectdate",rent_expectdate);
+		model.addAttribute("equn",equn);
+		model.addAttribute("rent",rent);
+		model.addAttribute("order",oe);
+		return "order/order_search";
+	}
+	/**
+	 * 根据设备号查询目的地
+	 * @param equipment_no
+	 * @return
+	 */
+	@RequestMapping(value="queryDcountry")
+	public @ResponseBody Object queryDcountry(String equipment_no){
+		return  orderService.queryDcountry(equipment_no);
+	}
+	/**
+	 * 更新订单
+	 * @param equipment_no
+	 * @param oe
+	 * @return
+	 */
+	@RequestMapping(value="update_order")
+	public String updateOrder(String equipment_no,OrderEntity oe){
+		orderService.updateOrder(oe);
+		eservice.updateEquipment(equipment_no, oe.getRent_enddate(), oe.getCost_sum(), oe.getRemark());
+		return "order/order_list";
+	}
+	//,String id,String rent_p_name,String rent_p_tel,String equipment_no,String rent_begindate,String rent_expectdate,String rent_enddate,String d_country,String payment
+	@RequestMapping(value="queryByCondition")
+	public @ResponseBody String queryOrderWithConditons(String id,String rent_p_name,String rent_p_tel,String equipment_no,String rent_begindate,String rent_expectdate,String rent_enddate,String d_country,String payment,String page,String rows){
+			/*oe.setId(id);
+			oe.setRent_p_name(rent_p_name);
+			oe.setRent_p_tel(rent_p_tel);
+			oe.setEquipment_no(equipment_no);
+			oe.setRent_begindate(rent_begindate);
+			oe.setRent_expectdate(rent_expectdate);
+			oe.setRent_enddate(rent_enddate);
+			oe.setD_country(d_country);
+			oe.setPayment(payment);*/
+			if(StringUtils.isEmpty(rent_begindate))
+				rent_begindate = "-";
+			if(StringUtils.isEmpty(rent_expectdate))
+				rent_expectdate = "-";
+			if(StringUtils.isEmpty(rent_enddate))
+				rent_enddate = "-";
+			//当前页  
+	        int intPage = Integer.parseInt((page == null || page == "0") ? "1":page);  
+	        //每页显示条数  
+	        int number = Integer.parseInt((rows == null || rows == "0") ? "10":rows);  
+	        //每页的开始记录  第一页为1  第二页为number +1  
+	        if(intPage<=0)
+	        	intPage = 1;
+	        int start = (intPage-1)*number;  
+	        int total = orderService.queryOrderRows();
+			//System.out.println(oe);
+	        d_country = orderService.getCountryCode(d_country);
+			List<OrderEntity> orders = orderService.queryOrderWithConditons(id,rent_p_name,rent_p_tel,equipment_no,rent_begindate,rent_expectdate,rent_enddate,d_country,payment,start,number);
+			//System.out.println("JSONSTRING================"+JSON.toJSONString(orders));
+			for(OrderEntity od:orders){
+				if(od.getRent_begindate()!=null)
+				od.setRent_begindate(od.getRent_begindate().substring(0,od.getRent_begindate().length()-2));
+				if(od.getRent_enddate()!=null)
+				od.setRent_enddate(od.getRent_enddate().substring(0,od.getRent_enddate().length()-2));
+				if(od.getCreate_time()!=null)
+				od.setCreate_time(od.getCreate_time().substring(0,od.getCreate_time().length()-2));
+				if(od.getRent_expectdate()!=null)
+				od.setRent_expectdate(od.getRent_expectdate().substring(0,od.getRent_expectdate().length()-2));
+				od.setPayment(orderService.getPaymentText(od.getPayment()));
+				od.setD_country(orderService.getCountry(od.getD_country()));
+				od.setRent_p_nationality(orderService.queryNationText(od.getRent_p_nationality()));
+			}
+			
+			return JSON.toJSONString(orders);
+		
+	}
+	/*//根据订单修改设备信息
+	@RequestMapping(value="update_equipment",method=RequestMethod.POST)
+	public String update_equipment(String equipment_no,String rent_enddate,String cost_sum,String remark){
+		orderService.updateEquipment(equipment_no, rent_enddate, cost_sum, remark);
+		return "equipment/equipment_list";
+	}*/
+	
+	/**
+	 * 得到现在时间组成ID
+	 * 
+	 * @return 字符串 yyyyMMdd HHmmss
+	 */
+	public static String getStringToday() {
+		Date currentTime = new Date();
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmssSS");
+		String dateString = formatter.format(currentTime);
+		return dateString;
+	}
+	/*public static void main(String[] args) {
+		System.out.println(getStringToday());
+	}*/
+	
+	
+}

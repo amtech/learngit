@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 
+	"-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jxc.web.user.dao.OrderDao">
+	<resultMap type="com.jxc.web.user.model.OrderEntity" id="R_Order_ENTITY" />
+	<resultMap type="Integer" id="ints" />
+	<resultMap type="String" id="str" />
+	<!-- 插入数据 -->
+	<select id="addOrder" resultMap="R_Order_ENTITY"
+		parameterType="map">
+	INSERT INTO `sky`.`t_3g_order` (`ID`, `ORDER_NUM`, `RENT_P_NAME`, `RENT_P_IDNUMBER`, `RENT_P_PASSPORTNO`, `RENT_P_NATIONALITY`, `RENT_P_TEL`, `RENT_BEGINDATE`, `RENT_ENDDATE`, `EQUIPMENT_NO`, `COST_RENT_3G`, `COST_RENT_EQUIPMENT`, `COST_RETURN_DISCOUNT`, `COST_SUM`, `CREATE_USER`, `CREATE_TIME`)
+	VALUES (#{id}, #{order_num}, #{rent_p_name}, #{rent_p_idnumber}, #{rent_p_passportno}, #{rent_p_nationality}, #{rent_p_tel}, #{rent_begindate}, #{rent_enddate}, #{equipment_no}, #{cost_rent_3g}, #{cost_rent_equipment}, #{cost_return_discount}, #{cost_sum}, #{create_user}, #{create_time});
+	</select>
+	<select id="queryOrder" resultMap="R_Order_ENTITY" parameterType="map">
+		SELECT `ID`, `ORDER_NUM`, `RENT_P_NAME`, `RENT_P_IDNUMBER`, `RENT_P_PASSPORTNO`, `RENT_P_NATIONALITY`, `RENT_P_TEL`, `RENT_BEGINDATE`, `RENT_ENDDATE`, `EQUIPMENT_NO`, `COST_RENT_3G`, `COST_RENT_EQUIPMENT`, `COST_RETURN_DISCOUNT`, `COST_SUM`, `CREATE_USER`, `CREATE_TIME` FROM t_3g_order;
+	</select>
+	<!-- 根据手机号或者设备号查询EQUIPMENT_NO = #{0} OR RENT_P_TEL = #{1}  -->
+	<select id="queryOrderByNum" resultMap="R_Order_ENTITY" parameterType="String">
+	   select * from t_3g_order where 1 = #{sqls} ;
+	</select>
+	<!-- 根据订单中的设备号修改设备信息：设备返还日期，设备租金，备注 -->
+	<!-- <select id="update_equipment" resultMap="R_Equipment_ENTITY" parameterType="map">
+		UPDATE `sky`.`t_3g_equipment` SET `TOTAL_RENT`=#{2},`REMARK`=#{3}, `RENT_ENDDATE`=#{1} WHERE  `NO`=#{0};
+	</select> -->
+	<select id="queryOrderByPage" resultMap="R_Order_ENTITY" parameterType="map">
+		SELECT `ID`, `ORDER_NUM`, `RENT_P_NAME`, `RENT_P_IDNUMBER`, `RENT_P_PASSPORTNO`, `RENT_P_NATIONALITY`, `RENT_P_TEL`, `RENT_BEGINDATE`, `RENT_ENDDATE`, `EQUIPMENT_NO`, `COST_RENT_3G`, `COST_RENT_EQUIPMENT`, `COST_RETURN_DISCOUNT`, `COST_SUM`, `CREATE_USER`, `CREATE_TIME` FROM t_3g_order LIMIT #{0},#{1};
+	</select>
+	<!-- 查询共有多少条记录 -->
+	<select id="queryOrderRows" resultMap="ints" parameterType="map">
+		SELECT COUNT(*) FROM t_3g_order ;
+	</select>
+</mapper>

@@ -1,0 +1,15 @@
+package com.jxc.web.user.dao;
+
+import java.util.List;
+
+import com.jxc.web.user.model.EquipmentEntity;
+import com.jxc.web.user.model.InfoEntity;
+
+public interface EquipmentDao {
+		//添加方法
+		public void add(EquipmentEntity equipment);
+		//查询方法
+		public List<EquipmentEntity> getList();
+		//根据订单中的设备号修改设备信息：设备返还日期，设备租金，备注
+		public abstract void updateEquipment(String equipment_no,String rent_enddate,String cost_sum,String remark);
+}

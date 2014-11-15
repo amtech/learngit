@@ -1,0 +1,121 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>登陆首页</title>
+	<link rel="stylesheet" type="text/css" href="../media/css/easyui.css">
+	<link rel="stylesheet" type="text/css" href="../media/css/icon.css">
+	<link rel="stylesheet" type="text/css" href="../media/css/demo.css">
+	<script type="text/javascript" src="../media/js/jquery.min.js"></script>
+	<script type="text/javascript" src="../media/js/jquery.easyui.min.js"></script>
+</head>
+<body class="easyui-layout">
+	<div data-options="region:'north',border:false" style="height:60px;background:#B3DFDA;padding:10px">龙在天下</div>
+	<div data-options="region:'west',split:true,title:'菜单栏'" style="width:150px;padding:10px;">
+		<div id="orders">订单管理
+			<div style="display:none;" id="order">
+				<a href="order/add">增加订单</a>
+			</div>
+		</div>
+		<!-- <dl>
+			<dt>订单管理</dt>
+			<dd>增加订单</dd>
+		</dl> -->
+		
+	</div>
+	<div data-options="region:'east',split:true,collapsed:true,title:'通知'" style="width:100px;padding:10px;">通知</div>
+	<div data-options="region:'south',border:false" style="height:5px;background:#A9FACD;padding:10px;"></div>
+	<div data-options="region:'center',title:'列表'">
+		<!-- 表单开始 -->
+		<form id="ff" action="add" method="POST">
+		<table cellpadding="5">
+		<!-- 一行四条信息 -->
+		
+		<tr>
+		<td>订单号:</td>
+		<td><input class="easyui-textbox" type="text" name="order_num" data-options="required:true"></input></td>
+		
+		<td>姓名:</td>
+		<td><input class="easyui-textbox" type="text" name="rent_p_name" data-options="required:true"></input></td>
+		
+		<td>身份证号:</td>
+		<td><input class="easyui-textbox" type="text" name="rent_p_idnumber" data-options="required:true"></input></td>
+		
+		<td>护照号:</td>
+		<td><input class="easyui-textbox" type="text" name="rent_p_passportno" data-options="multiline:true" ></input></td>
+		</tr>
+		
+		<tr>
+		<td>国籍 :</td>
+		<td>
+		<select class="easyui-combobox" name="rent_p_nationality"><option value="ar">Arabic</option><option value="bg">Bulgarian</option><option value="ca">Catalan</option><option value="zh" selected="selected">Chinese</option><option value="cs">Czech</option><option value="da">Danish</option><option value="nl">Dutch</option><option value="en" >English</option><option value="et">Estonian</option><option value="fi">Finnish</option><option value="fr">French</option><option value="de">German</option><option value="el">Greek</option><option value="ht">Haitian Creole</option><option value="he">Hebrew</option><option value="hi">Hindi</option><option value="mww">Hmong Daw</option><option value="hu">Hungarian</option><option value="id">Indonesian</option><option value="it">Italian</option><option value="ja">Japanese</option><option value="ko">Korean</option><option value="lv">Latvian</option><option value="lt">Lithuanian</option><option value="no">Norwegian</option><option value="fa">Persian</option><option value="pl">Polish</option><option value="pt">Portuguese</option><option value="ro">Romanian</option><option value="ru">Russian</option><option value="sk">Slovak</option><option value="sl">Slovenian</option><option value="es">Spanish</option><option value="sv">Swedish</option><option value="th">Thai</option><option value="tr">Turkish</option><option value="uk">Ukrainian</option><option value="vi">Vietnamese</option></select>
+		</td>
+		<td>手机号 :</td>
+		<td>
+		<input class="easyui-textbox" type="text" name="rent_p_tel" data-options="multiline:true" ></input>
+		</td>
+		<td>租用日期:</td>
+		<td>
+		<input class="easyui-textbox" type="text" name="rent_begindate" data-options="multiline:true" ></input>
+		</td>
+		<td>返还日期:</td>
+		<td>
+		<input class="easyui-textbox" type="text" name="rent_enddate" data-options="multiline:true" ></input>
+		</td>
+		</tr>
+		
+		<tr>
+		<td>设备号 :</td>
+		<td>
+		<input class="easyui-textbox" type="text" name="equipment_no" data-options="multiline:true" ></input>
+		</td>
+		<td>3G卡租赁费用 :</td>
+		<td>
+		<input class="easyui-textbox" type="text" name="cost_rent_3g" data-options="multiline:true" ></input>
+		</td>
+		<td>设备租赁费用 :</td>
+		<td>
+		<input class="easyui-textbox" type="text" name="cost_rent_equipment" data-options="multiline:true" ></input>
+		</td>
+		<td>押金 :</td>
+		<td>
+		<input class="easyui-textbox" type="text" name="cost_return_discount" data-options="multiline:true" ></input>
+		</td>
+		</tr>
+		
+		<tr>
+		<td>预收总金额 :</td>
+		<td>
+		<input class="easyui-textbox" type="text" name="upfront_sum" data-options="multiline:true" ></input>
+		</td>
+		<td>日期 :</td>
+		<td>
+		<input class="easyui-textbox" type="text" name="create_time" data-options="multiline:true" ></input>
+		</td>
+		<td>操作员 :</td>
+		<td>
+		<input class="easyui-textbox" type="text" name="create_user" data-options="multiline:true" ></input>
+		</td>
+		</tr>
+		
+		</table>
+		</form>
+		
+		<div style="text-align:center;padding:5px">
+		<a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()">Submit</a>
+		<a href="javascript:void(0)" class="easyui-linkbutton" onclick="clearForm()">Clear</a>
+		</div>
+		<!-- 表单结束 -->
+	</div>
+</body>
+ <script>
+		function submitForm(){
+		$('#ff').submit();
+		}
+		function clearForm(){
+		$('#ff').form('clear');
+		}
+</script>
+</html>
