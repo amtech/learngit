@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="com.qqjrbj.oasys.StampTurnover">
+  <process id="StampTurnoverApp" name="印章移交申请" isExecutable="true">
+    <startEvent id="startevent1" name="Start">
+      <extensionElements>
+        <activiti:executionListener event="start" class="com.oasys.listener.ad.StampTurnoverApp.StampTurnoverAppStartExecutionListener"></activiti:executionListener>
+      </extensionElements>
+    </startEvent>
+    <userTask id="DepartmentHeads" name="部门负责人" activiti:formKey="jsp/ad/stampTurnover/saveTask/departmentHeads.jsp">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.oasys.listener.ad.StampTurnoverApp.StampTurnoverAppTaskListener">
+          <activiti:field name="roleCodeKey">
+            <activiti:string><![CDATA[DepartmentHeads]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow1" name="业务员提交申请" sourceRef="startevent1" targetRef="DepartmentHeads"></sequenceFlow>
+    <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow2" name="部门负责人提交申请" sourceRef="DepartmentHeads" targetRef="exclusivegateway1"></sequenceFlow>
+    <userTask id="ExecutiveManager" name="行政经理" activiti:formKey="jsp/ad/stampTurnover/saveTask/executiveManager.jsp">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.oasys.listener.ad.StampTurnoverApp.StampTurnoverAppTaskListener">
+          <activiti:field name="roleCodeKey">
+            <activiti:string><![CDATA[ExecutiveManager]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="DepartmentHeadsSubmit" name="部门负责人通过" sourceRef="exclusivegateway1" targetRef="ExecutiveManager">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='DepartmentHeadsSubmit'}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask id="ApplyForAdjustment" name="申请调整" activiti:formKey="jsp/ad/stampTurnover/saveTask/applyForAdjustment.jsp">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.oasys.listener.ad.StampTurnoverApp.StampTurnoverAppTaskListener">
+          <activiti:field name="roleCodeKey">
+            <activiti:string><![CDATA[ApplyForAdjustment]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="DepartmentHeadsBack" name="部门负责人调整" sourceRef="exclusivegateway1" targetRef="ApplyForAdjustment">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='DepartmentHeadsBack'}]]></conditionExpression>
+    </sequenceFlow>
+    <exclusiveGateway id="exclusivegateway2" name="Exclusive Gateway"></exclusiveGateway>
+    <userTask id="ChiefExecutiveOfficer" name="行政总监" activiti:formKey="jsp/ad/stampTurnover/saveTask/chiefExecutiveOfficer.jsp">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.oasys.listener.ad.StampTurnoverApp.StampTurnoverAppTaskListener">
+          <activiti:field name="roleCodeKey">
+            <activiti:string><![CDATA[ChiefExecutiveOfficer]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="ExecutiveManagerSubmit" name="行政经理通过" sourceRef="exclusivegateway2" targetRef="ChiefExecutiveOfficer">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='ExecutiveManagerSubmit'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="ExecutiveManagerBack" name="行政经理调整" sourceRef="exclusivegateway2" targetRef="ApplyForAdjustment">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='ExecutiveManagerBack'}]]></conditionExpression>
+    </sequenceFlow>
+    <exclusiveGateway id="exclusivegateway3" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow8" sourceRef="ChiefExecutiveOfficer" targetRef="exclusivegateway3"></sequenceFlow>
+    <userTask id="ChiefCommissioner1" name="行政专员" activiti:formKey="jsp/ad/stampTurnover/saveTask/chiefCommissioner1.jsp">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.oasys.listener.ad.PPEScrapAppHo.PPEScrapAppHoTaskListener">
+          <activiti:field name="roleCodeKey">
+            <activiti:string><![CDATA[ChiefCommissioner]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="ChiefExecutiveOfficerSubmit" name="行政总监通过" sourceRef="exclusivegateway3" targetRef="ChiefCommissioner1">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='ChiefExecutiveOfficerSubmit'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="ChiefExecutiveOfficerBack" name="行政总监调整" sourceRef="exclusivegateway3" targetRef="ExecutiveManager">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='ChiefExecutiveOfficerBack'}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask id="Recipient" name="接收人" activiti:formKey="jsp/ad/stampTurnover/saveTask/recipient.jsp">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.oasys.listener.ad.StampTurnoverApp.StampTurnoverAppTaskListener">
+          <activiti:field name="roleCodeKey">
+            <activiti:string><![CDATA[Recipient]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="ChiefCommissioner1Submit" name="行政专员通过" sourceRef="ChiefCommissioner1" targetRef="Recipient">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='ChiefCommissioner1Submit'}]]></conditionExpression>
+    </sequenceFlow>
+    <exclusiveGateway id="exclusivegateway4" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow13" sourceRef="ApplyForAdjustment" targetRef="exclusivegateway4"></sequenceFlow>
+    <sequenceFlow id="ApplyForAdjustmentBack" name="申请调整驳回" sourceRef="exclusivegateway4" targetRef="DepartmentHeads">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='ApplyForAdjustmentBack'}]]></conditionExpression>
+    </sequenceFlow>
+    <endEvent id="endevent1" name="End">
+      <extensionElements>
+        <activiti:executionListener event="end" class="com.oasys.listener.ad.StampTurnoverApp.StampTurnoverAppStopExecutionListener"></activiti:executionListener>
+      </extensionElements>
+    </endEvent>
+    <sequenceFlow id="ApplyForAdjustmentSubmit" name="申请调整通过" sourceRef="exclusivegateway4" targetRef="endevent1">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='ApplyForAdjustmentSubmit'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow19" sourceRef="ExecutiveManager" targetRef="exclusivegateway2"></sequenceFlow>
+    <userTask id="ChiefCommissioner2" name="行政专员" activiti:formKey="jsp/ad/stampTurnover/saveTask/chiefCommissioner2.jsp">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.oasys.listener.ad.PPEScrapAppHo.PPEScrapAppHoTaskListener">
+          <activiti:field name="roleCodeKey">
+            <activiti:string><![CDATA[ChiefCommissioner]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="RecipientSubmit" name="接收人通过" sourceRef="Recipient" targetRef="ChiefCommissioner2">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='RecipientSubmit'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="ChiefCommissioner2Submit" name="行政专员通过" sourceRef="ChiefCommissioner2" targetRef="endevent1">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='ChiefCommissioner2Submit'}]]></conditionExpression>
+    </sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_StampTurnoverApp">
+    <bpmndi:BPMNPlane bpmnElement="StampTurnoverApp" id="BPMNPlane_StampTurnoverApp">
+      <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="424.0" y="20.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="DepartmentHeads" id="BPMNShape_DepartmentHeads">
+        <omgdc:Bounds height="55.0" width="105.0" x="389.0" y="91.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway1" id="BPMNShape_exclusivegateway1">
+        <omgdc:Bounds height="40.0" width="40.0" x="423.0" y="170.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="ExecutiveManager" id="BPMNShape_ExecutiveManager">
+        <omgdc:Bounds height="55.0" width="105.0" x="393.0" y="237.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="ApplyForAdjustment" id="BPMNShape_ApplyForAdjustment">
+        <omgdc:Bounds height="55.0" width="105.0" x="120.0" y="230.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway2" id="BPMNShape_exclusivegateway2">
+        <omgdc:Bounds height="40.0" width="40.0" x="425.0" y="320.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="ChiefExecutiveOfficer" id="BPMNShape_ChiefExecutiveOfficer">
+        <omgdc:Bounds height="55.0" width="105.0" x="395.0" y="402.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway3" id="BPMNShape_exclusivegateway3">
+        <omgdc:Bounds height="40.0" width="40.0" x="431.0" y="499.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="ChiefCommissioner1" id="BPMNShape_ChiefCommissioner1">
+        <omgdc:Bounds height="55.0" width="105.0" x="399.0" y="570.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="Recipient" id="BPMNShape_Recipient">
+        <omgdc:Bounds height="55.0" width="105.0" x="399.0" y="661.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway4" id="BPMNShape_exclusivegateway4">
+        <omgdc:Bounds height="40.0" width="40.0" x="30.0" y="237.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent1" id="BPMNShape_endevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="433.0" y="840.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="ChiefCommissioner2" id="BPMNShape_ChiefCommissioner2">
+        <omgdc:Bounds height="55.0" width="105.0" x="399.0" y="760.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1">
+        <omgdi:waypoint x="441.0" y="55.0"></omgdi:waypoint>
+        <omgdi:waypoint x="441.0" y="91.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="84.0" x="441.0" y="55.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow2" id="BPMNEdge_flow2">
+        <omgdi:waypoint x="441.0" y="146.0"></omgdi:waypoint>
+        <omgdi:waypoint x="443.0" y="170.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="42.0" width="100.0" x="464.0" y="144.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="DepartmentHeadsSubmit" id="BPMNEdge_DepartmentHeadsSubmit">
+        <omgdi:waypoint x="443.0" y="210.0"></omgdi:waypoint>
+        <omgdi:waypoint x="445.0" y="237.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="84.0" x="458.0" y="210.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="DepartmentHeadsBack" id="BPMNEdge_DepartmentHeadsBack">
+        <omgdi:waypoint x="423.0" y="190.0"></omgdi:waypoint>
+        <omgdi:waypoint x="172.0" y="190.0"></omgdi:waypoint>
+        <omgdi:waypoint x="172.0" y="230.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="84.0" x="251.0" y="170.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="ExecutiveManagerSubmit" id="BPMNEdge_ExecutiveManagerSubmit">
+        <omgdi:waypoint x="445.0" y="360.0"></omgdi:waypoint>
+        <omgdi:waypoint x="447.0" y="402.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="72.0" x="458.0" y="370.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="ExecutiveManagerBack" id="BPMNEdge_ExecutiveManagerBack">
+        <omgdi:waypoint x="425.0" y="340.0"></omgdi:waypoint>
+        <omgdi:waypoint x="172.0" y="340.0"></omgdi:waypoint>
+        <omgdi:waypoint x="172.0" y="285.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="72.0" x="271.0" y="320.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow8" id="BPMNEdge_flow8">
+        <omgdi:waypoint x="447.0" y="457.0"></omgdi:waypoint>
+        <omgdi:waypoint x="451.0" y="499.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="ChiefExecutiveOfficerSubmit" id="BPMNEdge_ChiefExecutiveOfficerSubmit">
+        <omgdi:waypoint x="451.0" y="539.0"></omgdi:waypoint>
+        <omgdi:waypoint x="451.0" y="570.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="100.0" x="465.0" y="538.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="ChiefExecutiveOfficerBack" id="BPMNEdge_ChiefExecutiveOfficerBack">
+        <omgdi:waypoint x="471.0" y="519.0"></omgdi:waypoint>
+        <omgdi:waypoint x="699.0" y="519.0"></omgdi:waypoint>
+        <omgdi:waypoint x="699.0" y="264.0"></omgdi:waypoint>
+        <omgdi:waypoint x="498.0" y="264.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="72.0" x="609.0" y="423.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="ChiefCommissioner1Submit" id="BPMNEdge_ChiefCommissioner1Submit">
+        <omgdi:waypoint x="451.0" y="625.0"></omgdi:waypoint>
+        <omgdi:waypoint x="451.0" y="661.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="100.0" x="451.0" y="625.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow13" id="BPMNEdge_flow13">
+        <omgdi:waypoint x="120.0" y="257.0"></omgdi:waypoint>
+        <omgdi:waypoint x="70.0" y="257.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="ApplyForAdjustmentBack" id="BPMNEdge_ApplyForAdjustmentBack">
+        <omgdi:waypoint x="50.0" y="237.0"></omgdi:waypoint>
+        <omgdi:waypoint x="50.0" y="118.0"></omgdi:waypoint>
+        <omgdi:waypoint x="389.0" y="118.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="72.0" x="60.0" y="171.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="ApplyForAdjustmentSubmit" id="BPMNEdge_ApplyForAdjustmentSubmit">
+        <omgdi:waypoint x="50.0" y="277.0"></omgdi:waypoint>
+        <omgdi:waypoint x="50.0" y="857.0"></omgdi:waypoint>
+        <omgdi:waypoint x="433.0" y="857.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="72.0" x="60.0" y="359.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow19" id="BPMNEdge_flow19">
+        <omgdi:waypoint x="445.0" y="292.0"></omgdi:waypoint>
+        <omgdi:waypoint x="445.0" y="320.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="RecipientSubmit" id="BPMNEdge_RecipientSubmit">
+        <omgdi:waypoint x="451.0" y="716.0"></omgdi:waypoint>
+        <omgdi:waypoint x="451.0" y="760.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="100.0" x="451.0" y="716.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="ChiefCommissioner2Submit" id="BPMNEdge_ChiefCommissioner2Submit">
+        <omgdi:waypoint x="451.0" y="815.0"></omgdi:waypoint>
+        <omgdi:waypoint x="450.0" y="840.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="100.0" x="451.0" y="815.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

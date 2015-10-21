@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="com.qqjrbj.oasys.ppeScrap">
+  <process id="PPEScrapAppHo" name="总部固定资产报废申请单" isExecutable="true">
+    <startEvent id="startevent1" name="Start">
+      <extensionElements>
+        <activiti:executionListener event="start" class="com.oasys.listener.ad.PPEScrapAppHo.PPEScrapAppHoStartExecutionListener"></activiti:executionListener>
+      </extensionElements>
+    </startEvent>
+    <userTask id="DepartmentHeads" name="部门负责人" activiti:formKey="jsp/ad/ppeScrap/hoSaveTask/departmentHeads.jsp">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.oasys.listener.ad.PPEScrapAppHo.PPEScrapAppHoTaskListener">
+          <activiti:field name="roleCodeKey">
+            <activiti:string><![CDATA[DepartmentHeads]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="FinancialManagerSubmit" name="业务员提交申请" sourceRef="startevent1" targetRef="DepartmentHeads"></sequenceFlow>
+    <exclusiveGateway id="DepartmentHeadsChoose" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="DepartmentHeadsStart" name="部门负责人提交申请" sourceRef="DepartmentHeads" targetRef="DepartmentHeadsChoose"></sequenceFlow>
+    <userTask id="ApplyForAdjustment" name="申请调整" activiti:formKey="jsp/ad/ppeScrap/hoSaveTask/applyForAdjustment.jsp">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.oasys.listener.ad.PPEScrapAppHo.PPEScrapAppHoTaskListener">
+          <activiti:field name="roleCodeKey">
+            <activiti:string><![CDATA[ApplyForAdjustment]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="DepartmentHeadsBack" name="部门负责人调整" sourceRef="DepartmentHeadsChoose" targetRef="ApplyForAdjustment">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='DepartmentHeadsBack'}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask id="ChiefCommissioner" name="行政专员" activiti:formKey="jsp/ad/ppeScrap/hoSaveTask/chiefCommissioner.jsp">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.oasys.listener.ad.PPEScrapAppHo.PPEScrapAppHoTaskListener">
+          <activiti:field name="roleCodeKey">
+            <activiti:string><![CDATA[ChiefCommissioner]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="DepartmentHeadsSubmit" name="部门负责人通过" sourceRef="DepartmentHeadsChoose" targetRef="ChiefCommissioner">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='DepartmentHeadsSubmit'}]]></conditionExpression>
+    </sequenceFlow>
+    <exclusiveGateway id="ChiefCommissionerChoose" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="ChiefCommissionerStart" name="行政专员提交申请" sourceRef="ChiefCommissioner" targetRef="ChiefCommissionerChoose"></sequenceFlow>
+    <sequenceFlow id="ChiefCommissionerBack" name="行政专员调整" sourceRef="ChiefCommissionerChoose" targetRef="ApplyForAdjustment">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='ChiefCommissionerBack'}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask id="CorporateFinance" name="财务主管" activiti:formKey="jsp/ad/ppeScrap/hoSaveTask/corporateFinance.jsp">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.oasys.listener.ad.PPEScrapAppHo.PPEScrapAppHoTaskListener">
+          <activiti:field name="roleCodeKey">
+            <activiti:string><![CDATA[CorporateFinance]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="ChiefCommissionerSubmit" name="行政专员通过" sourceRef="ChiefCommissionerChoose" targetRef="CorporateFinance">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='ChiefCommissionerSubmit'}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask id="ExecutiveManager" name="行政经理" activiti:formKey="jsp/ad/ppeScrap/hoSaveTask/executiveManager.jsp">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.oasys.listener.ad.PPEScrapAppHo.PPEScrapAppHoTaskListener">
+          <activiti:field name="roleCodeKey">
+            <activiti:string><![CDATA[ExecutiveManager]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="CorporateFinanceSubmit" name="财务主管提交申请" sourceRef="CorporateFinance" targetRef="ExecutiveManager">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='CorporateFinanceSubmit'}]]></conditionExpression>
+    </sequenceFlow>
+    <exclusiveGateway id="ExecutiveManagerChoose" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="ExecutiveManagerStart" name="行政经理提交申请" sourceRef="ExecutiveManager" targetRef="ExecutiveManagerChoose"></sequenceFlow>
+    <sequenceFlow id="ExecutiveManagerBack" name="行政经理驳回到行政专员" sourceRef="ExecutiveManagerChoose" targetRef="ChiefCommissioner">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='ExecutiveManagerBack'}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask id="ChiefExecutiveOfficer" name="行政总监" activiti:formKey="jsp/ad/ppeScrap/hoSaveTask/chiefExecutiveOfficer.jsp">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.oasys.listener.ad.PPEScrapAppHo.PPEScrapAppHoTaskListener">
+          <activiti:field name="roleCodeKey">
+            <activiti:string><![CDATA[ChiefExecutiveOfficer]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="ExecutiveManagerSubmit" name="行政经理通过" sourceRef="ExecutiveManagerChoose" targetRef="ChiefExecutiveOfficer">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='ExecutiveManagerSubmit'}]]></conditionExpression>
+    </sequenceFlow>
+    <exclusiveGateway id="ChiefExecutiveOfficerChoose" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="ChiefExecutiveOfficerStart" name="行政总监提交申请" sourceRef="ChiefExecutiveOfficer" targetRef="ChiefExecutiveOfficerChoose"></sequenceFlow>
+    <sequenceFlow id="ChiefExecutiveOfficerBack" name="行政总监驳回到行政经理" sourceRef="ChiefExecutiveOfficerChoose" targetRef="ExecutiveManager">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='ChiefExecutiveOfficerBack'}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask id="GeneralManager" name="总经理" activiti:formKey="jsp/ad/ppeScrap/hoSaveTask/generalManager.jsp">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.oasys.listener.ad.PPEScrapAppHo.PPEScrapAppHoTaskListener">
+          <activiti:field name="roleCodeKey">
+            <activiti:string><![CDATA[GeneralManager]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="ChiefExecutiveOfficerSubmit" name="行政总监通过" sourceRef="ChiefExecutiveOfficerChoose" targetRef="GeneralManager">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='ChiefExecutiveOfficerSubmit'}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask id="FinanceManager" name="财务经理" activiti:formKey="jsp/ad/ppeScrap/hoSaveTask/financeManager.jsp">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.oasys.listener.ad.PPEScrapAppHo.PPEScrapAppHoTaskListener">
+          <activiti:field name="roleCodeKey">
+            <activiti:string><![CDATA[FinanceManager]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <endEvent id="endevent1" name="End">
+      <extensionElements>
+        <activiti:executionListener event="end" class="com.oasys.listener.ad.PPEScrapAppHo.PPEScrapAppHoStopExecutionListener"></activiti:executionListener>
+      </extensionElements>
+    </endEvent>
+    <sequenceFlow id="FinanceManagerSubmit" name="财务经理通过" sourceRef="FinanceManager" targetRef="endevent1">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='FinanceManagerSubmit'}]]></conditionExpression>
+    </sequenceFlow>
+    <exclusiveGateway id="ApplyForAdjustmentChoose" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="ApplyForAdjustmentStart" sourceRef="ApplyForAdjustment" targetRef="ApplyForAdjustmentChoose"></sequenceFlow>
+    <sequenceFlow id="ApplyForAdjustmentBack" name="调整到部门负责人" sourceRef="ApplyForAdjustmentChoose" targetRef="DepartmentHeads">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='ApplyForAdjustmentBack'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="ApplyForAdjustmentSubmit" name="结束流程" sourceRef="ApplyForAdjustmentChoose" targetRef="endevent1">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='ApplyForAdjustmentSubmit'}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask id="FinancialDirector" name="财务总监" activiti:formKey="jsp/ad/ppeScrap/hoSaveTask/financialDirector.jsp">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.oasys.listener.ad.PPEScrapAppHo.PPEScrapAppHoTaskListener">
+          <activiti:field name="roleCodeKey">
+            <activiti:string><![CDATA[FinancialDirector]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="GeneralManagerSubmit" name="总经理通过" sourceRef="GeneralManager" targetRef="FinancialDirector">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='GeneralManagerSubmit'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="FinancialDirectorSubmit" name="财务总监通过" sourceRef="FinancialDirector" targetRef="FinanceManager">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='FinancialDirectorSubmit'}]]></conditionExpression>
+    </sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_PPEScrapAppHo">
+    <bpmndi:BPMNPlane bpmnElement="PPEScrapAppHo" id="BPMNPlane_PPEScrapAppHo">
+      <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="390.0" y="1.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="DepartmentHeads" id="BPMNShape_DepartmentHeads">
+        <omgdc:Bounds height="55.0" width="105.0" x="355.0" y="81.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="DepartmentHeadsChoose" id="BPMNShape_DepartmentHeadsChoose">
+        <omgdc:Bounds height="40.0" width="40.0" x="387.0" y="161.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="ApplyForAdjustment" id="BPMNShape_ApplyForAdjustment">
+        <omgdc:Bounds height="63.0" width="105.0" x="187.0" y="150.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="ChiefCommissioner" id="BPMNShape_ChiefCommissioner">
+        <omgdc:Bounds height="55.0" width="105.0" x="355.0" y="223.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="ChiefCommissionerChoose" id="BPMNShape_ChiefCommissionerChoose">
+        <omgdc:Bounds height="40.0" width="40.0" x="387.0" y="301.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="CorporateFinance" id="BPMNShape_CorporateFinance">
+        <omgdc:Bounds height="55.0" width="105.0" x="355.0" y="361.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="ExecutiveManager" id="BPMNShape_ExecutiveManager">
+        <omgdc:Bounds height="55.0" width="105.0" x="355.0" y="441.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="ExecutiveManagerChoose" id="BPMNShape_ExecutiveManagerChoose">
+        <omgdc:Bounds height="40.0" width="40.0" x="387.0" y="521.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="ChiefExecutiveOfficer" id="BPMNShape_ChiefExecutiveOfficer">
+        <omgdc:Bounds height="55.0" width="105.0" x="355.0" y="601.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="ChiefExecutiveOfficerChoose" id="BPMNShape_ChiefExecutiveOfficerChoose">
+        <omgdc:Bounds height="40.0" width="40.0" x="387.0" y="681.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="GeneralManager" id="BPMNShape_GeneralManager">
+        <omgdc:Bounds height="55.0" width="105.0" x="355.0" y="751.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="FinanceManager" id="BPMNShape_FinanceManager">
+        <omgdc:Bounds height="55.0" width="105.0" x="355.0" y="910.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent1" id="BPMNShape_endevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="390.0" y="990.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="ApplyForAdjustmentChoose" id="BPMNShape_ApplyForAdjustmentChoose">
+        <omgdc:Bounds height="40.0" width="40.0" x="100.0" y="165.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="FinancialDirector" id="BPMNShape_FinancialDirector">
+        <omgdc:Bounds height="55.0" width="105.0" x="355.0" y="830.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="FinancialManagerSubmit" id="BPMNEdge_FinancialManagerSubmit">
+        <omgdi:waypoint x="407.0" y="36.0"></omgdi:waypoint>
+        <omgdi:waypoint x="407.0" y="81.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="84.0" x="410.0" y="49.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="DepartmentHeadsStart" id="BPMNEdge_DepartmentHeadsStart">
+        <omgdi:waypoint x="407.0" y="136.0"></omgdi:waypoint>
+        <omgdi:waypoint x="407.0" y="161.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="42.0" width="100.0" x="427.0" y="142.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="DepartmentHeadsBack" id="BPMNEdge_DepartmentHeadsBack">
+        <omgdi:waypoint x="387.0" y="181.0"></omgdi:waypoint>
+        <omgdi:waypoint x="292.0" y="181.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="84.0" x="301.0" y="161.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="DepartmentHeadsSubmit" id="BPMNEdge_DepartmentHeadsSubmit">
+        <omgdi:waypoint x="407.0" y="201.0"></omgdi:waypoint>
+        <omgdi:waypoint x="407.0" y="223.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="84.0" x="410.0" y="195.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="ChiefCommissionerStart" id="BPMNEdge_ChiefCommissionerStart">
+        <omgdi:waypoint x="407.0" y="278.0"></omgdi:waypoint>
+        <omgdi:waypoint x="407.0" y="301.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="96.0" x="420.0" y="286.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="ChiefCommissionerBack" id="BPMNEdge_ChiefCommissionerBack">
+        <omgdi:waypoint x="387.0" y="321.0"></omgdi:waypoint>
+        <omgdi:waypoint x="242.0" y="320.0"></omgdi:waypoint>
+        <omgdi:waypoint x="239.0" y="213.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="72.0" x="261.0" y="302.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="ChiefCommissionerSubmit" id="BPMNEdge_ChiefCommissionerSubmit">
+        <omgdi:waypoint x="407.0" y="341.0"></omgdi:waypoint>
+        <omgdi:waypoint x="407.0" y="361.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="72.0" x="420.0" y="340.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="CorporateFinanceSubmit" id="BPMNEdge_CorporateFinanceSubmit">
+        <omgdi:waypoint x="407.0" y="416.0"></omgdi:waypoint>
+        <omgdi:waypoint x="407.0" y="441.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="96.0" x="420.0" y="419.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="ExecutiveManagerStart" id="BPMNEdge_ExecutiveManagerStart">
+        <omgdi:waypoint x="407.0" y="496.0"></omgdi:waypoint>
+        <omgdi:waypoint x="407.0" y="521.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="96.0" x="292.0" y="509.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="ExecutiveManagerBack" id="BPMNEdge_ExecutiveManagerBack">
+        <omgdi:waypoint x="427.0" y="541.0"></omgdi:waypoint>
+        <omgdi:waypoint x="675.0" y="540.0"></omgdi:waypoint>
+        <omgdi:waypoint x="675.0" y="250.0"></omgdi:waypoint>
+        <omgdi:waypoint x="460.0" y="250.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="42.0" width="100.0" x="489.0" y="498.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="ExecutiveManagerSubmit" id="BPMNEdge_ExecutiveManagerSubmit">
+        <omgdi:waypoint x="407.0" y="561.0"></omgdi:waypoint>
+        <omgdi:waypoint x="407.0" y="601.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="72.0" x="420.0" y="569.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="ChiefExecutiveOfficerStart" id="BPMNEdge_ChiefExecutiveOfficerStart">
+        <omgdi:waypoint x="407.0" y="656.0"></omgdi:waypoint>
+        <omgdi:waypoint x="407.0" y="681.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="96.0" x="420.0" y="659.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="ChiefExecutiveOfficerBack" id="BPMNEdge_ChiefExecutiveOfficerBack">
+        <omgdi:waypoint x="387.0" y="701.0"></omgdi:waypoint>
+        <omgdi:waypoint x="249.0" y="699.0"></omgdi:waypoint>
+        <omgdi:waypoint x="249.0" y="464.0"></omgdi:waypoint>
+        <omgdi:waypoint x="272.0" y="464.0"></omgdi:waypoint>
+        <omgdi:waypoint x="304.0" y="464.0"></omgdi:waypoint>
+        <omgdi:waypoint x="355.0" y="468.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="42.0" width="100.0" x="261.0" y="656.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="ChiefExecutiveOfficerSubmit" id="BPMNEdge_ChiefExecutiveOfficerSubmit">
+        <omgdi:waypoint x="407.0" y="721.0"></omgdi:waypoint>
+        <omgdi:waypoint x="407.0" y="751.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="72.0" x="407.0" y="721.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="FinanceManagerSubmit" id="BPMNEdge_FinanceManagerSubmit">
+        <omgdi:waypoint x="407.0" y="965.0"></omgdi:waypoint>
+        <omgdi:waypoint x="407.0" y="990.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="72.0" x="420.0" y="978.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="ApplyForAdjustmentStart" id="BPMNEdge_ApplyForAdjustmentStart">
+        <omgdi:waypoint x="187.0" y="181.0"></omgdi:waypoint>
+        <omgdi:waypoint x="140.0" y="185.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="ApplyForAdjustmentBack" id="BPMNEdge_ApplyForAdjustmentBack">
+        <omgdi:waypoint x="120.0" y="165.0"></omgdi:waypoint>
+        <omgdi:waypoint x="120.0" y="108.0"></omgdi:waypoint>
+        <omgdi:waypoint x="355.0" y="108.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="96.0" x="170.0" y="82.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="ApplyForAdjustmentSubmit" id="BPMNEdge_ApplyForAdjustmentSubmit">
+        <omgdi:waypoint x="120.0" y="205.0"></omgdi:waypoint>
+        <omgdi:waypoint x="120.0" y="1007.0"></omgdi:waypoint>
+        <omgdi:waypoint x="390.0" y="1007.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="48.0" x="138.0" y="909.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="GeneralManagerSubmit" id="BPMNEdge_GeneralManagerSubmit">
+        <omgdi:waypoint x="407.0" y="806.0"></omgdi:waypoint>
+        <omgdi:waypoint x="407.0" y="830.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="60.0" x="418.0" y="809.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="FinancialDirectorSubmit" id="BPMNEdge_FinancialDirectorSubmit">
+        <omgdi:waypoint x="407.0" y="885.0"></omgdi:waypoint>
+        <omgdi:waypoint x="407.0" y="910.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="100.0" x="418.0" y="889.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

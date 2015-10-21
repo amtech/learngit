@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
+  <process id="BadgeApp" name="工牌申请" isExecutable="true">
+    <startEvent id="startevent1" name="Start">
+      <extensionElements>
+        <activiti:executionListener event="start" class="com.oasys.listener.ad.badgeApp.BadgeAppStartExecutionListener"></activiti:executionListener>
+      </extensionElements>
+    </startEvent>
+    <userTask id="YingYeBuJingLi" name="营业部经理审批" activiti:formKey="yybjbadgeTask.jsp">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.oasys.listener.ad.badgeApp.BadgeAppAssistantTaskListener">
+          <activiti:field name="roleCodeKey">
+            <activiti:string><![CDATA[YingYeBuJingLi]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="FMYSubmitApply" name="行政前台提交申请" sourceRef="startevent1" targetRef="YingYeBuJingLi"></sequenceFlow>
+    <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow3" sourceRef="YingYeBuJingLi" targetRef="exclusivegateway1"></sequenceFlow>
+    <userTask id="XingZhengQianTai" name="申请调整" activiti:formKey="xzqtaibadgeTask.jsp">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.oasys.listener.ad.badgeApp.BadgeAppAssistantTaskListener">
+          <activiti:field name="roleCodeKey">
+            <activiti:string><![CDATA[XingZhengQianTai]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="SalesManagerRegect" name="营业部驳回" sourceRef="exclusivegateway1" targetRef="XingZhengQianTai">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='SalesManagerRegect'}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask id="XingZhengDuiJieZhuLi" name="行政对接助理" activiti:formKey="xzduijzlbadgeTask.jsp">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.oasys.listener.ad.badgeApp.BadgeAppAssistantTaskListener">
+          <activiti:field name="roleCodeKey">
+            <activiti:string><![CDATA[XingZhengDuiJieZhuLi]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="SalesManagerPass" name="营业部通过" sourceRef="exclusivegateway1" targetRef="XingZhengDuiJieZhuLi">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='SalesManagerPass'}]]></conditionExpression>
+    </sequenceFlow>
+    <exclusiveGateway id="exclusivegateway3" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow8" sourceRef="XingZhengDuiJieZhuLi" targetRef="exclusivegateway3"></sequenceFlow>
+    <userTask id="XingZhengJingLi" name="行政经理" activiti:formKey="xzhengjlbadgeTask.jsp">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.oasys.listener.ad.badgeApp.BadgeAppAssistantTaskListener">
+          <activiti:field name="roleCodeKey">
+            <activiti:string><![CDATA[XingZhengJingLi]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="AdminAssistantPass" name="行政对接助理通过" sourceRef="exclusivegateway3" targetRef="XingZhengJingLi">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='AdminAssistantPass'}]]></conditionExpression>
+    </sequenceFlow>
+    <exclusiveGateway id="exclusivegateway4" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow11" sourceRef="XingZhengJingLi" targetRef="exclusivegateway4"></sequenceFlow>
+    <userTask id="XingZhengZhuanYuan" name="行政专员" activiti:formKey="xzzhuanybadgeTask.jsp">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.oasys.listener.ad.badgeApp.BadgeAppAssistantTaskListener">
+          <activiti:field name="roleCodeKey">
+            <activiti:string><![CDATA[XingZhengZhuanYuan]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="AdminManagerPass" name="行政经理通过" sourceRef="exclusivegateway4" targetRef="XingZhengZhuanYuan">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='AdminManagerPass'}]]></conditionExpression>
+    </sequenceFlow>
+    <exclusiveGateway id="exclusivegateway5" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow17" sourceRef="XingZhengQianTai" targetRef="exclusivegateway5"></sequenceFlow>
+    <sequenceFlow id="ApplyAdjust" name="申请已调整" sourceRef="exclusivegateway5" targetRef="YingYeBuJingLi">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='ApplyAdjust'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="AdminAssistantRegect" name="行政对接助理驳回" sourceRef="exclusivegateway3" targetRef="XingZhengQianTai">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='AdminAssistantRegect'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="AdminManagerReject" name="行政经理驳回" sourceRef="exclusivegateway4" targetRef="XingZhengDuiJieZhuLi">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='AdminManagerReject'}]]></conditionExpression>
+    </sequenceFlow>
+    <endEvent id="endevent2" name="End">
+      <extensionElements>
+        <activiti:executionListener event="start" class="com.oasys.listener.ad.badgeApp.BadgeAppStopExecutionListener"></activiti:executionListener>
+      </extensionElements>
+    </endEvent>
+    <sequenceFlow id="AdminSpecialistPass" name="行政专员通过" sourceRef="XingZhengZhuanYuan" targetRef="endevent2">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='AdminSpecialistPass'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="RevokeApply" name="撤销申请" sourceRef="exclusivegateway5" targetRef="endevent2">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${result=='RevokeApply'}]]></conditionExpression>
+    </sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_BadgeApp">
+    <bpmndi:BPMNPlane bpmnElement="BadgeApp" id="BPMNPlane_BadgeApp">
+      <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="510.0" y="30.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="YingYeBuJingLi" id="BPMNShape_YingYeBuJingLi">
+        <omgdc:Bounds height="55.0" width="105.0" x="475.0" y="120.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway1" id="BPMNShape_exclusivegateway1">
+        <omgdc:Bounds height="40.0" width="40.0" x="507.0" y="230.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="XingZhengQianTai" id="BPMNShape_XingZhengQianTai">
+        <omgdc:Bounds height="55.0" width="105.0" x="340.0" y="223.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="XingZhengDuiJieZhuLi" id="BPMNShape_XingZhengDuiJieZhuLi">
+        <omgdc:Bounds height="55.0" width="105.0" x="475.0" y="330.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway3" id="BPMNShape_exclusivegateway3">
+        <omgdc:Bounds height="40.0" width="40.0" x="507.0" y="430.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="XingZhengJingLi" id="BPMNShape_XingZhengJingLi">
+        <omgdc:Bounds height="55.0" width="105.0" x="475.0" y="530.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway4" id="BPMNShape_exclusivegateway4">
+        <omgdc:Bounds height="40.0" width="40.0" x="507.0" y="630.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="XingZhengZhuanYuan" id="BPMNShape_XingZhengZhuanYuan">
+        <omgdc:Bounds height="55.0" width="105.0" x="475.0" y="739.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway5" id="BPMNShape_exclusivegateway5">
+        <omgdc:Bounds height="40.0" width="40.0" x="240.0" y="230.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent2" id="BPMNShape_endevent2">
+        <omgdc:Bounds height="35.0" width="35.0" x="510.0" y="860.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="FMYSubmitApply" id="BPMNEdge_FMYSubmitApply">
+        <omgdi:waypoint x="527.0" y="65.0"></omgdi:waypoint>
+        <omgdi:waypoint x="527.0" y="120.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="96.0" x="480.0" y="78.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow3" id="BPMNEdge_flow3">
+        <omgdi:waypoint x="527.0" y="175.0"></omgdi:waypoint>
+        <omgdi:waypoint x="527.0" y="230.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="SalesManagerRegect" id="BPMNEdge_SalesManagerRegect">
+        <omgdi:waypoint x="507.0" y="250.0"></omgdi:waypoint>
+        <omgdi:waypoint x="445.0" y="250.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="60.0" x="450.0" y="223.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="SalesManagerPass" id="BPMNEdge_SalesManagerPass">
+        <omgdi:waypoint x="527.0" y="270.0"></omgdi:waypoint>
+        <omgdi:waypoint x="527.0" y="330.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="60.0" x="499.0" y="276.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow8" id="BPMNEdge_flow8">
+        <omgdi:waypoint x="527.0" y="385.0"></omgdi:waypoint>
+        <omgdi:waypoint x="527.0" y="430.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="AdminAssistantPass" id="BPMNEdge_AdminAssistantPass">
+        <omgdi:waypoint x="527.0" y="470.0"></omgdi:waypoint>
+        <omgdi:waypoint x="527.0" y="530.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="96.0" x="487.0" y="493.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow11" id="BPMNEdge_flow11">
+        <omgdi:waypoint x="527.0" y="585.0"></omgdi:waypoint>
+        <omgdi:waypoint x="527.0" y="630.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="AdminManagerPass" id="BPMNEdge_AdminManagerPass">
+        <omgdi:waypoint x="527.0" y="670.0"></omgdi:waypoint>
+        <omgdi:waypoint x="527.0" y="739.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="72.0" x="478.0" y="679.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow17" id="BPMNEdge_flow17">
+        <omgdi:waypoint x="340.0" y="250.0"></omgdi:waypoint>
+        <omgdi:waypoint x="280.0" y="250.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="ApplyAdjust" id="BPMNEdge_ApplyAdjust">
+        <omgdi:waypoint x="260.0" y="230.0"></omgdi:waypoint>
+        <omgdi:waypoint x="260.0" y="147.0"></omgdi:waypoint>
+        <omgdi:waypoint x="475.0" y="147.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="60.0" x="220.0" y="195.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="AdminAssistantRegect" id="BPMNEdge_AdminAssistantRegect">
+        <omgdi:waypoint x="507.0" y="450.0"></omgdi:waypoint>
+        <omgdi:waypoint x="392.0" y="450.0"></omgdi:waypoint>
+        <omgdi:waypoint x="392.0" y="278.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="96.0" x="344.0" y="389.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="AdminManagerReject" id="BPMNEdge_AdminManagerReject">
+        <omgdi:waypoint x="547.0" y="650.0"></omgdi:waypoint>
+        <omgdi:waypoint x="691.0" y="649.0"></omgdi:waypoint>
+        <omgdi:waypoint x="691.0" y="357.0"></omgdi:waypoint>
+        <omgdi:waypoint x="580.0" y="357.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="72.0" x="659.0" y="495.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="AdminSpecialistPass" id="BPMNEdge_AdminSpecialistPass">
+        <omgdi:waypoint x="527.0" y="794.0"></omgdi:waypoint>
+        <omgdi:waypoint x="527.0" y="860.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="72.0" x="499.0" y="799.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="RevokeApply" id="BPMNEdge_RevokeApply">
+        <omgdi:waypoint x="260.0" y="270.0"></omgdi:waypoint>
+        <omgdi:waypoint x="260.0" y="877.0"></omgdi:waypoint>
+        <omgdi:waypoint x="510.0" y="877.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="48.0" x="230.0" y="329.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>
